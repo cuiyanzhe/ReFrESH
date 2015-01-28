@@ -1,0 +1,34 @@
+
+**** Build of configuration Debug for project Bubble1_to_4_nodeCfg ****
+
+make all 
+Building file: ../src/helloworld.c
+Invoking: PowerPC gcc compiler
+powerpc-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -I../../Bubble1_to_4_nodeCfg_bsp/ppc440_0/include -mcpu=440 -MMD -MP -MF"src/helloworld.d" -MT"src/helloworld.d" -o"src/helloworld.o" "../src/helloworld.c"
+Finished building: ../src/helloworld.c
+' '
+Building target: Bubble1_to_4_nodeCfg.elf
+Invoking: PowerPC gcc linker
+powerpc-eabi-gcc -Wl,-T -Wl,../src/lscript.ld -L../../Bubble1_to_4_nodeCfg_bsp/ppc440_0/lib -mcpu=440 -o"Bubble1_to_4_nodeCfg.elf"  ./src/helloworld.o ./src/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+Finished building target: Bubble1_to_4_nodeCfg.elf
+' '
+Invoking: PowerPC Print Size
+powerpc-eabi-size Bubble1_to_4_nodeCfg.elf  |tee "Bubble1_to_4_nodeCfg.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+   3010	    312	     28	   3350	    d16	Bubble1_to_4_nodeCfg.elf
+Finished building: Bubble1_to_4_nodeCfg.elf.size
+' '
+Invoking: Xilinx ELF Check
+elfcheck Bubble1_to_4_nodeCfg.elf -hw ../../ReFrESH_Bubble1_to_Bubble4_hw_platform/system.xml -pe ppc440_0  |tee "Bubble1_to_4_nodeCfg.elf.elfcheck"
+elfcheck
+Xilinx EDK 14.4 Build EDK_P.49d
+Copyright (c) 1995-2012 Xilinx, Inc.  All rights reserved.
+
+Command Line: elfcheck -hw
+../../ReFrESH_Bubble1_to_Bubble4_hw_platform/system.xml -pe ppc440_0
+Bubble1_to_4_nodeCfg.elf 
+
+ELF file	: Bubble1_to_4_nodeCfg.elf
+elfcheck passed.
+Finished building: Bubble1_to_4_nodeCfg.elf.elfcheck
+' '
