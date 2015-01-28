@@ -29,8 +29,6 @@ int main()
 {
     init_platform();
 
-    //show change to Josh
-
     print("Hello World\n\r");
 
     return 0;
