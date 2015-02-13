@@ -25,6 +25,9 @@
 #define DEBUG 0
 #define EVAL_TEST	0
 
+#define SSD_DEBUG 0
+#define TASK_DEBUG 1
+
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
 #define TEMP_HEIGHT 3
@@ -225,10 +228,15 @@ char SSD_cycle(processT *p_ptr)
 		for(j=0; j<=(IMG_WIDTH-TEMP_WIDTH); j++){
 			for(k=0; k<TEMP_HEIGHT; k++){
 				for(l=0; l<TEMP_WIDTH; l++){
+#if TASK_DEBUG
 					pixel_error = pixel_error + ((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l]-(int)template3G[k * TEMP_WIDTH + l])*
 							((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l] - (int)template3G[k * TEMP_WIDTH + l]);
-//					pixel_error = pixel_error + ((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l]-(int)template2G[k * TEMP_WIDTH + l])*
-//							((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l] - (int)template2G[k * TEMP_WIDTH + l]);
+#endif
+
+#if SSD_DEBUG
+					pixel_error = pixel_error + ((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l]-(int)template2G[k * TEMP_WIDTH + l])*
+							((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l] - (int)template2G[k * TEMP_WIDTH + l]);
+#endif
 				}
 			}
 
@@ -243,10 +251,12 @@ char SSD_cycle(processT *p_ptr)
 
 	xil_printf("Smallest Error: %d, X Loc: %d, Y Loc: %d\r\n", errorImg, targetXLoc, targetYLoc);
 
+#if TASK_DEBUG
 	pSSDLocal->outPtr[0] = targetXLoc;
 	pSSDLocal->outPtr[1] = targetYLoc;
 
 	xil_printf("SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
+#endif
 
 	return I_OK;
 

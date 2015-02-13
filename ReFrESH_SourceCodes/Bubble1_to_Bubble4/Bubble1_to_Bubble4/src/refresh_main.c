@@ -19,6 +19,7 @@
 #include "camReader.h"
 #include "SSD.h"
 #include "trajGen.h"
+#include "menu.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -26,6 +27,7 @@
 #define TEST	0
 #define DEBUG	0
 #define DEBUG_PRINT		0
+#define MENU_DEBUG 1
 
 /* ********************************************************************************************************************************************* */
 /*      Global variables                                             														 					 */
@@ -33,6 +35,7 @@
 processT *camReaderIDG;
 processT *ssdIDG;
 processT *trajGenIDG;
+processT *menuIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -80,6 +83,12 @@ int main()
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
 
+#if MENU_DEBUG
+	menuIDG = sbsSpawn(menu_init, 5, 0, 0);
+	sbsControl(menuIDG, SBS_ON);
+#endif
+
+#if DEBUG
 	/* Turn on components */
 	sbsControl(camReaderIDG, SBS_ON);
 	sbsControl(ssdIDG, SBS_ON);
@@ -93,6 +102,7 @@ int main()
 	sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBuffer);
 	sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBuffer);
 	sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBuffer);
+#endif
 
 	while(1)
 	{

@@ -14,22 +14,33 @@
 #include <stdlib.h>
 #include "pbort.h"
 #include "serial.h"
+#include "refresh_main.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
 /* ********************************************************************************************************************************************* */
 
-#define DEBUG 0
+#define DEBUG 1
 
-#define TARGET_SERACH		0x30	/* 0 */
-#define TRAJ_GEN			0x31	/* 1 */
-#define MOVE_TO_TARGET		0x32	/* 2 */
-#define WAIT_STABLE			0x33	/* 3 */
-#define CAMERA_READER		0x61	/* a */
-#define SSD					0x62	/* b */
-#define TRAJ_GEN_COMP		0x63	/* c */
-#define SERVO_ROTATE		0x64	/* d */
+#define SBS_SET_TEST_ON			0x30	/* 0 */
+#define SBS_SET_TEST_OFF		0x39	/* 9 */
 
+#define TARGET_SERACH			0x31	/* 1 */
+#define TRAJ_GEN				0x32	/* 2 */
+#define MOVE_TO_TARGET			0x33	/* 3 */
+#define WAIT_STABLE				0x34	/* 4 */
+
+#define CAMERA_READER_ON		0x61	/* a */
+#define CAMERA_READER_OFF		0x41	/* A */
+#define SSD_ON					0x62	/* b */
+#define SSD_OFF					0x42	/* B */
+#define TRAJ_GEN_ON				0x63	/* c */
+#define TRAJ_GEN_OFF			0x43	/* C */
+#define SERVO_ON				0x64	/* d */
+#define SERVO_OFF				0x44	/* D */
+
+#define IMG_HEIGHT 10
+#define IMG_WIDTH  10
 
 /* ******************************************************************** */
 /*       menu_on                Start up the module.                    */
@@ -46,13 +57,18 @@ char menu_on(processT *p_ptr)
 
 /* This is the menu handler via the serial port */
 
-/* --- 0	TARGET_SEARCH		*/
-/* --- 1	TRAJ_GEN			*/
-/* --- 2	MOVE_TO_TARGET		*/
-/* --- 3	WAIT_STABLE			*/
-/* --- a	CAMERA_READER		*/
-/* --- b	SSD(TARGET MATCH)	*/
-/* --- c	TRAJ_GENERATION		*/
+/* --- 0	SBS_SET_TEST_ON		*/
+/* --- 9	SBS_SET_TEST_OFF		*/
+/* --- 1	TARGET_SEARCH		*/
+/* --- 2	TRAJ_GEN			*/
+/* --- 3	MOVE_TO_TARGET		*/
+/* --- 4	WAIT_STABLE			*/
+/* --- a	CAMERA_READER_ON		*/
+/* --- A	CAMERA_READER_OFF		*/
+/* --- b	SSD_ON	*/
+/* --- B	SSD_OFF	*/
+/* --- c	TRAJ_GEN_ON		*/
+/* --- C	TRAJ_GEN_OFF		*/
 /* --- d	SERVO_ROTATE		*/
 
 char menu_cycle(processT *p_ptr)
@@ -65,12 +81,68 @@ char menu_cycle(processT *p_ptr)
 		str[0] = 0;
 		n = serGetChar1(str);
 		switch(str[0]){
-
-#if DEBUG
-			case CAMERA_READER:
-				sbsControl(camIDG,SBS_ON);
+			/* in order to test individual component, be sure change from TASK_DEBUG to XXX_DEBUG mode
+			 * or you can run SBS_SET_TEST_ON firstly. Otherwise, the pointers are not initialized */
+			case CAMERA_READER_ON:
+				xil_printf("Turn on camReader component to test!\r\n");
+				sbsControl(camReaderIDG,SBS_ON);
 			break;
 
+			case CAMERA_READER_OFF:
+				sbsControl(camReaderIDG,SBS_OFF);
+				xil_printf("Turn off camReader component!\r\n");
+			break;
+
+			case  SSD_ON:
+				xil_printf("Turn on SSD component to test!\r\n");
+				sbsControl(ssdIDG,SBS_ON);
+			break;
+
+			case  SSD_OFF:
+				sbsControl(ssdIDG,SBS_OFF);
+				xil_printf("Turn off SSD component!\r\n");
+			break;
+
+			case  TRAJ_GEN_ON:
+				xil_printf("Turn on trajGen component to test!\r\n");
+				sbsControl(trajGenIDG,SBS_ON);
+			break;
+
+			case  TRAJ_GEN_OFF:
+				sbsControl(trajGenIDG,SBS_OFF);
+				xil_printf("Turn off trajGen component!\r\n");
+			break;
+
+			case SBS_SET_TEST_ON:
+				/* Turn off components just in case
+				 * Don't forget to flip xxx_DEBUG and TASK_DEBUG from 0 to 1 and 1 to 0 in each 'component'.c */
+				sbsControl(camReaderIDG, SBS_OFF);
+				sbsControl(ssdIDG, SBS_OFF);
+				sbsControl(trajGenIDG, SBS_OFF);
+
+				/* Turn on components */
+				sbsControl(camReaderIDG, SBS_ON);
+				sbsControl(ssdIDG, SBS_ON);
+				sbsControl(trajGenIDG, SBS_ON);
+
+				/* Connect components manually */
+				uint8_t *imgBuffer = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
+				uint8_t *tempPosBuffer = (uint8_t*)malloc(2);	/* X & Y location in image frame, 2 bytes */
+
+				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBuffer);
+				sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBuffer);
+				sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBuffer);
+				sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBuffer);
+			break;
+
+			case SBS_SET_TEST_OFF:
+				sbsControl(camReaderIDG, SBS_OFF);
+				sbsControl(ssdIDG, SBS_OFF);
+				sbsControl(trajGenIDG, SBS_OFF);
+				xil_printf("Turn off all component for safe!\r\n");
+			break;
+
+#if !DEBUG
 			case TARGET_SERACH:/* read camera*/
 				if(cam_st == 0){
 					sbsControl(camIDG,SBS_ON);

@@ -20,8 +20,8 @@
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
 /* ********************************************************************************************************************************************* */
-#define DEBUG 0
-#define DEBUG_PRINT 1
+#define CAMERA_DEBUG 0
+#define TASK_DEBUG 1
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -129,7 +129,7 @@ char camReader_cycle(processT *p_ptr)
 	uint16_t pixelCnt = 0;
 	uint8_t *pImg = imgBufferG[0];
 
-#if DEBUG
+#if CAMERA_DEBUG
 	uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
 	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
 		testImgBuf[pixelCnt] = pImg[pixelCnt];
@@ -143,14 +143,13 @@ char camReader_cycle(processT *p_ptr)
 			xil_printf("\r\n");
 		}
 	}
-#else
+#endif
+
+#if TASK_DEBUG
 	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
 		pCamReaderLocal->outPtr[pixelCnt] = pImg[pixelCnt];
 		pixelCnt++;
 	}
-#endif
-
-#if DEBUG_PRINT
 	/* test if the output of outPtr buffer is correct */
 	uint8_t i = 0;
 	for(i = 0; i < 100; i++){
@@ -173,10 +172,6 @@ char camReader_init(processT *p_ptr, void *vptr)
 	p_ptr->on_fptr = camReader_on;
 	p_ptr->cycle_fptr = camReader_cycle;
 	p_ptr->off_fptr = NULL;
-
-#if DEBUG
-	xil_printf("(camReader_init)Debug the affection of SET function\r\n");
-#else
 	p_ptr->set_fptr = camReader_set;
 	p_ptr->get_fptr = NULL;
 
@@ -191,7 +186,6 @@ char camReader_init(processT *p_ptr, void *vptr)
 
 	/* malloc a space for the outPtr buffer that would be used by sbsSet*/
 //	pCamReaderLocal->outPtr = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
-#endif
 
 	return I_OK;
 }

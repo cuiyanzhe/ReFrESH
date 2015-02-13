@@ -24,6 +24,9 @@
 #define DEBUG 0
 #define EVAL_TEST	0
 
+#define TRAJGEN_DEBUG 0
+#define TASK_DEBUG 1
+
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
 #define TEMP_HEIGHT 3
@@ -108,9 +111,26 @@ char trajGen_cycle(processT *p_ptr)
 {
 	PBOextendT  *pTrajGenLocal = (PBOextendT *)p_ptr->local;
 	
-	uint8_t xLoc = pTrajGenLocal->inPtr[0];
 	uint8_t imgCenter = IMG_WIDTH / 2;
-  
+
+	/* ---TODO:
+	 * Implement a real trajectory generator
+	 */
+#if TRAJGEN_DEBUG
+	uint8_t xLoc = 3;
+	xil_printf("The X Loc is: %d.\r\n", xLoc);
+
+	if(xLoc < imgCenter){
+		xil_printf("Turn left!\r\n");
+	}else if(xLoc > imgCenter){
+		xil_printf("Turn right!\r\n");
+	}else{
+		xil_printf("Stay there!\r\n");
+	}
+#endif
+
+#if TASK_DEBUG
+	uint8_t xLoc = pTrajGenLocal->inPtr[0];
 	xil_printf("The X Loc got from SSD module is: %d.\r\n", xLoc);
 
 	if(xLoc < imgCenter){
@@ -120,6 +140,7 @@ char trajGen_cycle(processT *p_ptr)
 	}else{
 		xil_printf("Stay there!\r\n");
 	}
+#endif
 
 	return I_OK;
 }
