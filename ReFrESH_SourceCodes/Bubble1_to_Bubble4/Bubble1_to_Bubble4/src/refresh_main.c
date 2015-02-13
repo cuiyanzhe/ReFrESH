@@ -81,8 +81,8 @@ int main()
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
 
 	/* Turn on components */
-	sbsControl(ssdIDG, SBS_ON);
 	sbsControl(camReaderIDG, SBS_ON);
+	sbsControl(ssdIDG, SBS_ON);
 	sbsControl(trajGenIDG, SBS_ON);
 
 	/* Connect components manually */

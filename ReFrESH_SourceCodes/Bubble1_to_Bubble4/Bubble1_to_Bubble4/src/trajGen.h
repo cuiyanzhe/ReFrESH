@@ -12,6 +12,7 @@
 
 char trajGen_on(processT *p_ptr);
 char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
+char trajGen_cycle(processT *p_ptr);
 char trajGen_init(processT *p_ptr, void*vptr);
 
 

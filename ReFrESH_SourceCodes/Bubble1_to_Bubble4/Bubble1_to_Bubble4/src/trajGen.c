@@ -43,7 +43,10 @@ char trajGen_on(processT *p_ptr)
 	return I_OK;
 }
 
-/* **********************  traj_set() ***************************************/
+
+/* ******************************************************************** */
+/*       trajGen_set              Set connection among components.      */
+/* ******************************************************************** */
 
 char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 {
@@ -56,7 +59,7 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 		break;
 
 		case DATA_OUT:
-			pTrajGenLocal->outPtr = (int8_t *)vptr;
+			pTrajGenLocal->outPtr = (uint8_t *)vptr;
 			return I_OK;
 		break;
 
@@ -96,7 +99,11 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 	return I_OK;
 }
 
-/* **********************  traj_cycle() ***************************************/
+
+/* ******************************************************************** */
+/*       SSD_cycle              Trajectory generation.                  */
+/* ******************************************************************** */
+
 char trajGen_cycle(processT *p_ptr)
 {
 	PBOextendT  *pTrajGenLocal = (PBOextendT *)p_ptr->local;
@@ -117,7 +124,11 @@ char trajGen_cycle(processT *p_ptr)
 	return I_OK;
 }
 
-/* **********************  traj_init() ***************************************/
+
+/* ******************************************************************** */
+/*        trajGen_init             Initiate module information.         */
+/* ******************************************************************** */
+
 char trajGen_init(processT *p_ptr, void*vptr)
 {	
 	p_ptr->on_fptr = trajGen_on;
