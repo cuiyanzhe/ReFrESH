@@ -20,6 +20,7 @@
 #include "SSD.h"
 #include "trajGen.h"
 #include "menu.h"
+#include "visualServoTask.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -36,6 +37,7 @@ processT *camReaderIDG;
 processT *ssdIDG;
 processT *trajGenIDG;
 processT *menuIDG;
+processT *visualServoTaskIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -82,6 +84,7 @@ int main()
 	camReaderIDG = sbsSpawn(camReader_init, 5, 0, 0);
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
+	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 5, 0, 0);
 
 #if MENU_DEBUG
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);

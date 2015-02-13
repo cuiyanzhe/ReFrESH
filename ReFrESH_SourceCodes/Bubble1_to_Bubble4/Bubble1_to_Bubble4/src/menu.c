@@ -38,6 +38,8 @@
 #define TRAJ_GEN_OFF			0x43	/* C */
 #define SERVO_ON				0x64	/* d */
 #define SERVO_OFF				0x44	/* D */
+#define VS_TASK_ON				0x74	/* t */
+#define VS_TASK_OFF				0x54	/* T */
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -70,6 +72,8 @@ char menu_on(processT *p_ptr)
 /* --- c	TRAJ_GEN_ON		*/
 /* --- C	TRAJ_GEN_OFF		*/
 /* --- d	SERVO_ROTATE		*/
+
+/* --- T	VS_TASK_ON		*/
 
 char menu_cycle(processT *p_ptr)
 {
@@ -140,6 +144,19 @@ char menu_cycle(processT *p_ptr)
 				sbsControl(ssdIDG, SBS_OFF);
 				sbsControl(trajGenIDG, SBS_OFF);
 				xil_printf("Turn off all component for safe!\r\n");
+			break;
+
+			case VS_TASK_ON:
+				xil_printf("Turn on visualServoTask component to test!\r\n");
+				sbsControl(visualServoTaskIDG, SBS_ON);
+			break;
+
+			case VS_TASK_OFF:
+				sbsControl(visualServoTaskIDG, SBS_OFF);
+				sbsControl(camReaderIDG, SBS_OFF);
+				sbsControl(ssdIDG, SBS_OFF);
+				sbsControl(trajGenIDG, SBS_OFF);
+				xil_printf("Turn off visualServoTask component for safe!\r\n");
 			break;
 
 #if !DEBUG

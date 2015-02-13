@@ -11,7 +11,7 @@
 #define MENU_H_
 
 char menu_on(void *vptr);
+char menu_cycle(processT *p_ptr);
 char menu_init(processT *p_ptr, void *vptr);
-char menu_cycle(processT *p_ptr, void *vptr);
 
 #endif /* MENU_H_ */
