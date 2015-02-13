@@ -348,7 +348,7 @@ processT *sbsSpawn(charfnc_ptr f_ptr, float freq, short crit, void *vptr)
     /* end of list found so allocate a new list element */
     if ((queue->nextProc = (pointer) malloc(sizeof(procListT))) == NULL){
     	xil_printf("Error: malloc failed during spawn (1)\r\n");
-      return NULL;
+    	return NULL;
     } /* endif */
     queue = queue->nextProc;
   } /* endif */
@@ -447,9 +447,9 @@ int sbsControl(processT *p_ptr, short cmd)
     if ((p_ptr->on_fptr != NULL) && ((tmp = p_ptr->on_fptr(p_ptr)) != I_OK)){
       /* If SBS_OFF was returned, call the off routine */
     	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x50);
-      if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
-	p_ptr->off_fptr(p_ptr);
-      return tmp;
+    	if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
+    		p_ptr->off_fptr(p_ptr);
+    	return tmp;
     } /* endif */
     //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x51);
     /* get the process ready to run */
@@ -1314,11 +1314,11 @@ void sched()
 //	m = serGetOSCmd1(strG);		// Check each serial char for the '!' indicator
 	//XUartLite_SendByte(UARTLITE_BASEADDRESS, 0xAA);
 	//XUartLite_SendByte(XPAR_RS232_UART_1_BASEADDR,m);
-		if(m > 0)
-		{
-			//XUartLite_SendByte(XPAR_RS232_UART_1_BASEADDR,0x38);
-			//serXmit1((unsigned char *)strG,m);
-		  	parseOSCmd(strG);
-		}
+//		if(m > 0)
+//		{
+//			//XUartLite_SendByte(XPAR_RS232_UART_1_BASEADDR,0x38);
+//			//serXmit1((unsigned char *)strG,m);
+//		  	parseOSCmd(strG);
+//		}
 
 }

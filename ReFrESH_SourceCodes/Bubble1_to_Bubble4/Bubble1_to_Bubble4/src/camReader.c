@@ -11,7 +11,7 @@
 /* ********************************************************************************************************************************************* */
 
 #include <string.h>
-#include <stdlib.h>
+#include <stdlib.h>		/* for malloc() */
 #include "pbort.h"
 #include "compStructure.h"
 #include "serial.h"
@@ -21,13 +21,15 @@
 /*      definition							                                              														 */
 /* ********************************************************************************************************************************************* */
 #define DEBUG 0
-#define HEIGHT 10
-#define WIDTH  10
+#define DEBUG_PRINT 1
+
+#define IMG_HEIGHT 10
+#define IMG_WIDTH  10
 
 /* ********************************************************************************************************************************************* */
 /*      global variable						                                              														 */
 /* ********************************************************************************************************************************************* */
-uint8_t imgBufferG[HEIGHT][WIDTH] = {
+uint8_t imgBufferG[IMG_HEIGHT][IMG_WIDTH] = {
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
@@ -127,12 +129,28 @@ char camReader_cycle(processT *p_ptr)
 	uint16_t pixelCnt = 0;
 	uint8_t *pImg = imgBufferG[0];
 
-	while(pixelCnt < HEIGHT * WIDTH){
-		pCamReaderLocal->outPtr[pixelCnt] = pImg[pixelCnt];
+#if DEBUG
+	uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
+	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+		testImgBuf[pixelCnt] = pImg[pixelCnt];
 		pixelCnt++;
 	}
 
-#if DEBUG
+	uint8_t i = 0;
+	for(i = 0; i < 100; i++){
+		xil_printf("%d, ", testImgBuf[i]);
+		if(i % 10 == 9){
+			xil_printf("\r\n");
+		}
+	}
+#else
+	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+		pCamReaderLocal->outPtr[pixelCnt] = pImg[pixelCnt];
+		pixelCnt++;
+	}
+#endif
+
+#if DEBUG_PRINT
 	/* test if the output of outPtr buffer is correct */
 	uint8_t i = 0;
 	for(i = 0; i < 100; i++){
@@ -152,24 +170,28 @@ char camReader_cycle(processT *p_ptr)
 
 char camReader_init(processT *p_ptr, void *vptr)
 {
-
-
 	p_ptr->on_fptr = camReader_on;
 	p_ptr->cycle_fptr = camReader_cycle;
 	p_ptr->off_fptr = NULL;
+
+#if DEBUG
+	xil_printf("(camReader_init)Debug the affection of SET function\r\n");
+#else
 	p_ptr->set_fptr = camReader_set;
 	p_ptr->get_fptr = NULL;
 
-	/* malloc a space for local structure of a component */
+	/* Allocate the local structure for the module - optional
+	 * This struct will be freed automatically when SBS_KILL is implemented */
 	if((p_ptr->local = (pointer)malloc(sizeof(PBOextendT))) == NULL){
 		return I_ERROR;
 	}
 
 	/* define a pointer points to local structure */
-	PBOextendT  *pCamReaderLocal = (PBOextendT *)p_ptr->local;
+//	PBOextendT  *pCamReaderLocal = (PBOextendT *)p_ptr->local;
 
 	/* malloc a space for the outPtr buffer that would be used by sbsSet*/
-	pCamReaderLocal->outPtr = (uint8_t*)malloc(WIDTH * HEIGHT);
+//	pCamReaderLocal->outPtr = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
+#endif
 
 	return I_OK;
 }

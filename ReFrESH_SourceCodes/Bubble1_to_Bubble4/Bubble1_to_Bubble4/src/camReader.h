@@ -1,4 +1,4 @@
-/* --- camReader       Version 1.0
+/* --- camReader.h       Version 1.0
    --- This file provides the related function prototype of frame grabber.
    ---
    --- Copyright 2015, Collaborative Robotics Lab.

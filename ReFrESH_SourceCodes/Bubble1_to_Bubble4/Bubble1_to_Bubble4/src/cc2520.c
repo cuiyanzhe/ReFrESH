@@ -21,7 +21,7 @@
 #include "xgpio.h"
 #include "spi.h"
 #include "time.h"
-#include "main.h"
+#include "refresh_main.h"
 #include "BasicCC2520.h"
 #include "cc2520.h"
 

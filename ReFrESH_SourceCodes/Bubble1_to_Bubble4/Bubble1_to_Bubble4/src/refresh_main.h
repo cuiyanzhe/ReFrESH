@@ -1,4 +1,4 @@
-/* --- main.h       Version 1.0
+/* --- refresh_main.h       Version 1.0
    --- header for BasicCC2520.c
    ---
    --- Copyright 2001, Mark V Automation Corp.
@@ -7,8 +7,8 @@
    ---
    --- */
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef REFRESH_MAIN_H_
+#define REFRESH_MAIN_H_
 
 /* ********************************************************************************************************************************************* */
 /*      Include Files						                                              														 */
@@ -21,13 +21,15 @@
 
 extern processT	*menuIDG;
 extern processT	*camReaderIDG;
+extern processT *ssdIDG;
+extern processT *trajGenIDG;
 
-extern uint8_t initFlagG;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 enum {NO_TASK, BLINK, PD, TRAJQ};
 
-#endif
 
+#endif /* REFRESH_MAIN_H_ */
