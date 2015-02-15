@@ -249,14 +249,15 @@ char SSD_cycle(processT *p_ptr)
 		}
 	}
 
-	xil_printf("Smallest Error: %d, X Loc: %d, Y Loc: %d\r\n", errorImg, targetXLoc, targetYLoc);
+//	xil_printf("Smallest Error: %d, X Loc: %d, Y Loc: %d\r\n", errorImg, targetXLoc, targetYLoc);
 
 #if TASK_DEBUG
 	pSSDLocal->outPtr[0] = targetXLoc;
 	pSSDLocal->outPtr[1] = targetYLoc;
-
-	xil_printf("SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
+	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
 #endif
+
+	ssdState = 2;
 
 	return I_OK;
 
@@ -292,6 +293,8 @@ char SSD_init(processT *p_ptr, void*vptr)
 
 
 #endif
+
+	ssdState = 0;
 
 	return I_OK;
 }

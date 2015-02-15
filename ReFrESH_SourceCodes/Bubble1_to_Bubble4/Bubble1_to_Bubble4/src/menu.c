@@ -147,7 +147,7 @@ char menu_cycle(processT *p_ptr)
 			break;
 
 			case VS_TASK_ON:
-				xil_printf("Turn on visualServoTask component to test!\r\n");
+				xil_printf("(Menu.c)Turn on visualServoTask component to test!\r\n");
 				sbsControl(visualServoTaskIDG, SBS_ON);
 			break;
 
@@ -156,7 +156,8 @@ char menu_cycle(processT *p_ptr)
 				sbsControl(camReaderIDG, SBS_OFF);
 				sbsControl(ssdIDG, SBS_OFF);
 				sbsControl(trajGenIDG, SBS_OFF);
-				xil_printf("Turn off visualServoTask component for safe!\r\n");
+				sbsControl(actuatorIDG, SBS_OFF);
+				xil_printf("(Menu.c)Turn off visualServoTask component for safe!\r\n");
 			break;
 
 #if !DEBUG

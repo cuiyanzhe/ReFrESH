@@ -15,6 +15,7 @@
 #include "pbort.h"
 #include "serial.h"
 #include "compStructure.h"
+#include "trajGen.h"
 
 
 /* ********************************************************************************************************************************************* */
@@ -131,16 +132,18 @@ char trajGen_cycle(processT *p_ptr)
 
 #if TASK_DEBUG
 	uint8_t xLoc = pTrajGenLocal->inPtr[0];
-	xil_printf("The X Loc got from SSD module is: %d.\r\n", xLoc);
+	xil_printf("(trajGen.c)The X Loc got from SSD module is: %d.\r\n", xLoc);
 
 	if(xLoc < imgCenter){
-		xil_printf("Turn left!\r\n");
+		xil_printf("(trajGen.c)Turn left!\r\n");
 	}else if(xLoc > imgCenter){
-		xil_printf("Turn right!\r\n");
+		xil_printf("(trajGen.c)Turn right!\r\n");
 	}else{
-		xil_printf("Stay there!\r\n");
+		xil_printf("(trajGen.c)Stay there!\r\n");
 	}
 #endif
+
+	trajState = 2;
 
 	return I_OK;
 }
@@ -163,5 +166,7 @@ char trajGen_init(processT *p_ptr, void*vptr)
 			return I_ERROR;
 	}
 	
+	trajState = 0;
+
 	return I_OK;
 }

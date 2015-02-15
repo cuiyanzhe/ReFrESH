@@ -15,4 +15,6 @@ char camReader_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
 char camReader_cycle(processT *p_ptr);
 char camReader_init(processT *p_ptr, void *vptr);
 
+uint8_t cameraState;
+
 #endif /* CAMREADER_H_ */

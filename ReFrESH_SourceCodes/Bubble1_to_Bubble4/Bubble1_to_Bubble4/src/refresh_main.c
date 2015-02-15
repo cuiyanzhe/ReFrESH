@@ -21,6 +21,7 @@
 #include "trajGen.h"
 #include "menu.h"
 #include "visualServoTask.h"
+#include "actuator.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -38,6 +39,7 @@ processT *ssdIDG;
 processT *trajGenIDG;
 processT *menuIDG;
 processT *visualServoTaskIDG;
+processT *actuatorIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -56,7 +58,7 @@ int main()
 	short camMissed; /* to monitor the miss cycles of camera component */
 	short ssdMissed; /* to monitor the miss cycles of SSD component */
 
-	xil_printf("Start...\r\n");
+	xil_printf("Start, please check menu to test...\r\n");
 
 #if TEST
 	uint8_t imgBuffer[10][10] = {
@@ -81,10 +83,13 @@ int main()
 	sched_init(1000);
 
 	/* Spawn components */
+	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 20, 0, 0);
+
 	camReaderIDG = sbsSpawn(camReader_init, 5, 0, 0);
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
-	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 5, 0, 0);
+	actuatorIDG = sbsSpawn(actuator_init, 5, 0, 0);
+
 
 #if MENU_DEBUG
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);

@@ -30,7 +30,7 @@ typedef struct _EXTENDED_PBO{
 	uint8_t				*inPtr;
 	uint8_t				*outPtr;
 	uint8_t				nodeNum;
-	uint8_t				runFreq;
+//	uint8_t				runFreq;
 
 	/* this part is for Evaluator (EV), it includes 1) functional evaluated value
 	 * and 2) non-functional evaluated value. These values are compared with the

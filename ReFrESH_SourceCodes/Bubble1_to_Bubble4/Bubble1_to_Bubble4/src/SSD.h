@@ -16,5 +16,7 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
 char SSD_cycle(processT *p_ptr);
 char SSD_init(processT *p_ptr, void*vptr);
 
+uint8_t ssdState;
+
 
 #endif /* SSD_H_ */

@@ -152,6 +152,7 @@ char camReader_cycle(processT *p_ptr)
 	}
 	/* test if the output of outPtr buffer is correct */
 	uint8_t i = 0;
+	xil_printf("(camReader.c)Print out pixels info.\r\n");
 	for(i = 0; i < 100; i++){
 		xil_printf("%d, ", pCamReaderLocal->outPtr[i]);
 		if(i % 10 == 9){
@@ -159,6 +160,8 @@ char camReader_cycle(processT *p_ptr)
 		}
 	}
 #endif
+
+	cameraState = 2;
 
 	return I_OK;
 }
@@ -186,6 +189,8 @@ char camReader_init(processT *p_ptr, void *vptr)
 
 	/* malloc a space for the outPtr buffer that would be used by sbsSet*/
 //	pCamReaderLocal->outPtr = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
+
+	cameraState = 0;
 
 	return I_OK;
 }

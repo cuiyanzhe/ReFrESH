@@ -16,6 +16,10 @@
 #include "serial.h"
 #include "visualServoTask.h"
 #include "refresh_main.h"
+#include "camReader.h"
+#include "SSD.h"
+#include "trajGen.h"
+#include "actuator.h"
 
 
 /* ********************************************************************************************************************************************* */
@@ -64,7 +68,7 @@ char visualServoTask_cycle(processT *p_ptr)
 	task_localT  *local = (task_localT *)p_ptr->local;
 
 	switch(local->state){
-		case 0:	/* Target Search: camReaderIDG + ssdIDG */
+		case 0:	/* camReader */
 			/*if(!sbsControl(camReaderIDG, SBS_ON)){
 				sbsControl(camReaderIDG, SBS_ON);
 			}
@@ -72,6 +76,17 @@ char visualServoTask_cycle(processT *p_ptr)
 				sbsControl(ssdIDG, SBS_ON);
 			}*/
 
+			if(cameraState == 0){
+				sbsControl(camReaderIDG, SBS_ON);
+
+				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+
+				cameraState = 1;
+			}else if(cameraState == 2){
+				cameraState = 0;
+				local->state = 1;
+			}
+#if DEBUG
 			waitCnt = 0; /* initialize stop and stare state counter */
 
 			sbsControl(camReaderIDG, SBS_ON);
@@ -83,36 +98,64 @@ char visualServoTask_cycle(processT *p_ptr)
 			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
 			sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
 			sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
-#if DEBUG
+
 			sbsControl(camReaderIDG, SBS_OFF);
 			sbsControl(ssdIDG, SBS_OFF);
 #endif
 			local->state = 1;
 		break;
 
-		case 1: /* Trajectory Generation */
+		case 1: /* Target Detect */
 			/*if(!sbsControl(trajGenIDG, SBS_ON)){
 				sbsControl(trajGenIDG, SBS_ON);
 			}*/
 
+			if(ssdState == 0){
+				sbsControl(ssdIDG, SBS_ON);
+
+				sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
+				sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
+
+				ssdState = 1;
+			}else if(ssdState == 2){
+				ssdState = 0;
+				local->state = 2;
+			}
+#if DEBUG
 			sbsControl(trajGenIDG, SBS_ON);
 			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
 
-#if DEBUG
+
 			sbsControl(trajGenIDG, SBS_OFF);
 #endif
 			local->state = 2;
 		break;
 
-		case 2: /* Move to Target */
-			/* --- TODO:
-			 * create a servo component
-			 */
-			xil_printf("Move 10 degree!\r\n");
-			local->state = 3;
+		case 2: /* Trajectory Generation */
+			if(trajState == 0){
+				sbsControl(trajGenIDG, SBS_ON);
+
+				sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
+
+				trajState = 1;
+			}else if(trajState == 2){
+				trajState = 0;
+				local->state = 2;
+			}
+
+		case 3: /* Move to Target */
+			if(actuatorState == 0){
+				sbsControl(actuatorIDG, SBS_ON);
+
+				actuatorState = 1;
+			}else if(actuatorState == 2){
+				actuatorState = 0;
+				local->state = 4;
+			}
+			local->state = 4;
 		break;
 
-		case 3: /* Stay and Stare */
+		case 4: /* Stay and Stare */
 			for(waitCnt = 0; waitCnt < 5; waitCnt++){
 				xil_printf("Wait %d seconds\r\n", waitCnt);
 			}
