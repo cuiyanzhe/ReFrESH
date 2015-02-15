@@ -1290,14 +1290,9 @@ void parseDLline(uint8_t *str)
  */
 int sbsEvaluator(processT *p_ptr)
 {
-//	procListT     *queue;
-	procListT     *spawned; //, *prevSpawn;
-//	procListT     *temp;
-//	int           i, tmp;
+	procListT     *spawned;
 
-//	queue = onQueueG;
 	spawned = spawnQueueG;
-//	prevSpawn = NULL;
 
 	/* Make sure it has been spawned */
 	if (spawned->process == NULL){
