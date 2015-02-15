@@ -169,7 +169,7 @@ char visualServoTask_cycle(processT *p_ptr)
 
 
 /* ******************************************************************** */
-/*        SSD_init                 Initiate module information.         */
+/*        visualServoTask_init          Initiate module information.    */
 /* ******************************************************************** */
 
 char visualServoTask_init(processT *p_ptr, void *vptr)

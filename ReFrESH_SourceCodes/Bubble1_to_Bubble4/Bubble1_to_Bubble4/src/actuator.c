@@ -59,6 +59,11 @@ char actuator_cycle(processT *p_ptr)
 	return I_OK;
 }
 
+
+/* ******************************************************************** */
+/*        actuator_init                 Initiate module information.    */
+/* ******************************************************************** */
+
 char actuator_init(processT *p_ptr, void *vptr)
 {
 	p_ptr->on_fptr = actuator_on;
