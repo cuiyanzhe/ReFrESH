@@ -29,7 +29,7 @@
 /* ********************************************************************************************************************************************* */
 /*      global variable						                                              														 */
 /* ********************************************************************************************************************************************* */
-uint8_t imgBufferG[IMG_HEIGHT][IMG_WIDTH] = {
+uint8_t imgBufferTestG[IMG_HEIGHT][IMG_WIDTH] = {
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
 		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
@@ -127,7 +127,9 @@ char camReader_cycle(processT *p_ptr)
 	 * }
 	 */
 	uint16_t pixelCnt = 0;
-	uint8_t *pImg = imgBufferG[0];
+	uint8_t *pImg = imgBufferTestG[0];
+
+//	xil_printf("TP1\r\n");
 
 #if CAMERA_DEBUG
 	uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
@@ -166,6 +168,21 @@ char camReader_cycle(processT *p_ptr)
 	return I_OK;
 }
 
+
+/* ******************************************************************** */
+/*       camReader_cycle              Get the frame.                    */
+/* ******************************************************************** */
+
+char camReader_eval(processT *p_ptr)
+{
+	PBOextendT  *pCamReaderLocal = (PBOextendT *)p_ptr->local;
+	pCamReaderLocal->power = 50;
+	xil_printf("Power usage of camReader is: %d\r\n", pCamReaderLocal->power);
+
+	return I_OK;
+}
+
+
 /* ******************************************************************** */
 /*        camReader_init           Initiate module information.         */
 /* ******************************************************************** */
@@ -177,6 +194,7 @@ char camReader_init(processT *p_ptr, void *vptr)
 	p_ptr->off_fptr = NULL;
 	p_ptr->set_fptr = camReader_set;
 	p_ptr->get_fptr = NULL;
+	p_ptr->eval_fptr = camReader_eval;
 
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */

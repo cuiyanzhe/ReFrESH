@@ -208,7 +208,7 @@ char Zigbee_Receive()
 	{
 		n = rf_polling_rx_packet();	/* check and see if a packet has been read successfully	*/
 
-#if DEBUG	/* print out message in RX buffer for debugging*/
+#if !DEBUG	/* print out message in RX buffer for debugging*/
 		if (n == 1)
 		{
 //				xil_printf("Message received: " );

@@ -38,7 +38,7 @@
 /*      global variable						                                              														 */
 /* ********************************************************************************************************************************************* */
 
-uint8_t imgBufferTestG[IMG_HEIGHT * IMG_WIDTH] = {
+uint8_t imgBufferTestSSDG[IMG_HEIGHT * IMG_WIDTH] = {
 		55, 55, 55, 255, 255, 255, 255, 255, 255, 255,
 		55, 55, 55, 255, 255, 255, 255, 255, 255, 255,
 		55, 55, 55, 255, 255, 255, 255, 255, 255, 255,
@@ -234,8 +234,8 @@ char SSD_cycle(processT *p_ptr)
 #endif
 
 #if SSD_DEBUG
-					pixel_error = pixel_error + ((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l]-(int)template2G[k * TEMP_WIDTH + l])*
-							((int)imgBufferTestG[(i + k) * IMG_WIDTH + j + l] - (int)template2G[k * TEMP_WIDTH + l]);
+					pixel_error = pixel_error + ((int)imgBufferTestSSDG[(i + k) * IMG_WIDTH + j + l]-(int)template2G[k * TEMP_WIDTH + l])*
+							((int)imgBufferTestSSDG[(i + k) * IMG_WIDTH + j + l] - (int)template2G[k * TEMP_WIDTH + l]);
 #endif
 				}
 			}
@@ -273,6 +273,8 @@ char SSD_init(processT *p_ptr, void*vptr)
 	p_ptr->on_fptr = SSD_on;
 	p_ptr->cycle_fptr = SSD_cycle;
 	p_ptr->off_fptr = NULL;
+
+	//p_ptr->eval_fptr = SSD_eval;
 
 #if DEBUG
 	xil_printf("(SSD_init)Debug the affection of SET function\r\n");

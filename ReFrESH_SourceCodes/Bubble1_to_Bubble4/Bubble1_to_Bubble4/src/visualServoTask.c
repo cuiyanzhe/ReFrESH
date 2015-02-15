@@ -45,6 +45,7 @@ int waitCnt;
 uint8_t imgBufferG[IMG_HEIGHT * IMG_WIDTH];
 uint8_t tempPosBufferG[2];	/* X & Y location in image frame, 2 bytes */
 
+
 /* ******************************************************************** */
 /*       visualServoTask_on             Start up the module.            */
 /* ******************************************************************** */
@@ -58,6 +59,7 @@ char visualServoTask_on(processT *p_ptr)
 
 	return I_OK;
 }
+
 
 /* ******************************************************************** */
 /*       visualServoTask_cycle       FSM to execute a task.             */
@@ -78,7 +80,6 @@ char visualServoTask_cycle(processT *p_ptr)
 
 			if(cameraState == 0){
 				sbsControl(camReaderIDG, SBS_ON);
-
 				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
 
 				cameraState = 1;
@@ -102,6 +103,8 @@ char visualServoTask_cycle(processT *p_ptr)
 			sbsControl(camReaderIDG, SBS_OFF);
 			sbsControl(ssdIDG, SBS_OFF);
 #endif
+			sbsEvaluator(camReaderIDG);
+
 			local->state = 1;
 		break;
 
@@ -177,6 +180,8 @@ char visualServoTask_init(processT *p_ptr, void *vptr)
 	p_ptr->on_fptr = visualServoTask_on;
 	p_ptr->cycle_fptr = visualServoTask_cycle;
 	p_ptr->off_fptr = NULL;
+
+//	p_ptr->eval_fptr = NULL;
 
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */

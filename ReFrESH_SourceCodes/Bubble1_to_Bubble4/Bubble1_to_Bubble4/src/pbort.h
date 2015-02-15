@@ -68,25 +68,27 @@ typedef void *pointer;
 typedef struct{ charfnc_ptr     on_fptr;
                 charfnc_ptr     cycle_fptr;
                 charfnc_ptr     off_fptr;
+                charfnc_ptr		eval_fptr;		/* ??????? YC added to support EVALUATOR 02/15/2015 */
                 charfnc_ptr     kill_fptr;
 //	            charfnc_ptr     get_fptr;
 //	            charfnc_ptr     set_fptr;
-                setfnc_ptr get_fptr;
-                setfnc_ptr set_fptr;
-		          unsigned long   pid;
+                setfnc_ptr 		get_fptr;
+                setfnc_ptr 		set_fptr;
+//                charfnc_ptr		eval_fptr;	/* ??????? YC added to support EVALUATOR 02/15/2015 */
+		        unsigned long   pid;
                 short           status;
                 short           criticality;
                 unsigned long   nPeriod;
                 unsigned long   nextReady;
                 float           freq;
                 short           missed;
-		          pointer         local;
-		          char				  modName[16];
+		        pointer         local;
+		        char			modName[16];
 		    }   processT;
 
 typedef struct{ processT        *process;
                 pointer         nextProc;
-                } procListT;
+              } procListT;
 
 #ifndef SCHED_SRC
 #define SCHED_SRC
@@ -111,6 +113,9 @@ extern processT *sbsModPtr(char *mname);
 /* --- sbsListMods prints a list of module names. */
 extern int sbsListMods();
 
+/* YC adds this for EVALUATOR 02/15/2015 */
+extern int sbsEvaluator(processT *p_ptr);
+
 extern procListT *spawnQueueG;
 
 extern void sched();
@@ -129,9 +134,9 @@ extern uint8_t		codeStatusG;
 extern uint16_t		codeAddrG;
 extern uint16_t		codeInitAddrG;
 
-extern uint8_t	fillerCodeG[0x70];
-extern uint8_t	newCodeG[1024];
-extern uint8_t	*baseCodeG;
+extern uint8_t		fillerCodeG[0x70];
+extern uint8_t		newCodeG[1024];
+extern uint8_t		*baseCodeG;
 extern uint8_t		progCodeG[256];
 
 

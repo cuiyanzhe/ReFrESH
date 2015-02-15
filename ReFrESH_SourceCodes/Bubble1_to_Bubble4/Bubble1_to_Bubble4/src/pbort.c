@@ -110,6 +110,9 @@ uint8_t		estOutBufferG = 0;				//assume data out type is uint8_t for now
 #define		OFFSET_REC	7
 #define		INITPTR_REC	8
 
+
+#define CUI_DEBUG 1    /* YC: debug the SBS_ON, 02/15/2015 */
+
 /* ************ Function Prototypes ************** */
 
 /* ************ Interrupt Code ******************* */
@@ -388,6 +391,7 @@ processT *sbsSpawn(charfnc_ptr f_ptr, float freq, short crit, void *vptr)
   queue->process->kill_fptr = NULL;
   queue->process->set_fptr = NULL;
   queue->process->get_fptr = NULL;
+  queue->process->eval_fptr = NULL;    /* YC adds to support EVALUATOR 02/15/2015 */
 
   queue->nextProc = NULL;
 
@@ -399,97 +403,94 @@ processT *sbsSpawn(charfnc_ptr f_ptr, float freq, short crit, void *vptr)
 
 int sbsControl(processT *p_ptr, short cmd)
 {
-  procListT     *queue;
-  procListT     *spawned, *prevSpawn;
-  procListT     *temp;
-  int           i, tmp;
+	procListT     *queue;
+	procListT     *spawned, *prevSpawn;
+	procListT     *temp;
+	int           i, tmp;
 
-  queue = onQueueG;
-  spawned = spawnQueueG;
-  prevSpawn = NULL;
+	queue = onQueueG;
+	spawned = spawnQueueG;
+	prevSpawn = NULL;
 
-  /* Make sure it has been spawned */
-  if (spawned->process == NULL){
-	xil_printf("ERROR: nothing spawned \r\n");
-	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x45);
-    return I_ERROR;
-  } /* endif */
-  if ((p_ptr == NULL) || (p_ptr->pid >= pidG)){
-	xil_printf("ERROR: process ID invalid \r\n");
-	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x46);
-    return I_ERROR;
-  } /* endif */
+	/* Make sure it has been spawned */
+	if (spawned->process == NULL){
+		xil_printf("ERROR: nothing spawned \r\n");
+		return I_ERROR;
+	} /* endif */
+	if ((p_ptr == NULL) || (p_ptr->pid >= pidG)){
+		xil_printf("ERROR: process ID invalid \r\n");
+		return I_ERROR;
+	} /* endif */
 
-  switch (cmd){
-  case SBS_ON:
-    /* make sure it's off */
-	  //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x47);
-    if (p_ptr->status != SBS_OFF){
-      //sprintf(message, "ERROR: process not off \r\n");
-      //UART_SendString(message);
-    	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x48);
-      return I_ERROR;
-    } /* endif */
+	switch (cmd){
+		case SBS_ON:
+			/* make sure it's off */
+			if (p_ptr->status != SBS_OFF){
+				//sprintf(message, "ERROR: process not off \r\n");
+				//UART_SendString(message);
+				return I_ERROR;
+			} /* endif */
 
-    /* Execute the "ON" routine */
-    //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x49);
-    //if (p_ptr->on_fptr != NULL){
-    	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x01);
-    //		if ((tmp = p_ptr->on_fptr(p_ptr->local)) != I_OK){
-          	  	/* If SBS_OFF was returned, call the off routine */
-        		//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x50);
-    //    			if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
-    //    				p_ptr->off_fptr(p_ptr->local);
-    //    		return tmp;
-    //		}
-    		//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x02);
-    //    } /* endif */
-    if ((p_ptr->on_fptr != NULL) && ((tmp = p_ptr->on_fptr(p_ptr)) != I_OK)){
-      /* If SBS_OFF was returned, call the off routine */
-    	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x50);
-    	if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
-    		p_ptr->off_fptr(p_ptr);
-    	return tmp;
-    } /* endif */
-    //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x51);
-    /* get the process ready to run */
-    p_ptr->status = SBS_ON;
-    p_ptr->nextReady = timerTicksG;
-    //p_ptr->nextReady = timerTicksG + p_ptr->nPeriod;			//Changed by JTL 9/7/14 to equate to older version PBORT
-    //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x52);
-   // xil_printf("Process on!\r\n");
+#if CUI_DEBUG
+			/* Execute the "ON" routine */
+			if (p_ptr->on_fptr != NULL){
+				if ((tmp = p_ptr->on_fptr(p_ptr->local)) != I_OK){
+					/* If SBS_OFF was returned, call the off routine */
+			    	if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
+			    		p_ptr->off_fptr(p_ptr->local);
 
-    /* if it's the first process in the on queue, put it there. */
-    if (queue->process == NULL){
-    	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x53);
-#ifdef DEBUG
-    	xil_printf("first process turned on \n");
+			    	return tmp;
+				}
+			} /* endif */
+#else
+			if ((p_ptr->on_fptr != NULL) && ((tmp = p_ptr->on_fptr(p_ptr)) != I_OK)){
+				/* If SBS_OFF was returned, call the off routine */
+				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x50);
+				if ((tmp == SBS_OFF) && (p_ptr->off_fptr != NULL))
+					p_ptr->off_fptr(p_ptr);
+				return tmp;
+			} /* endif */
 #endif
 
-      queue->nextProc = NULL;
-      queue->process = p_ptr;
+			/* get the process ready to run */
+			p_ptr->status = SBS_ON;
+			p_ptr->nextReady = timerTicksG;
+			//p_ptr->nextReady = timerTicksG + p_ptr->nPeriod;			//Changed by JTL 9/7/14 to equate to older version PBORT
+			//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x52);
+		   // xil_printf("Process on!\r\n");
 
-    } else {    /* not first process, so add element to list */
-      /* find the end of the linked list */
-    	//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x54);
+			/* if it's the first process in the on queue, put it there. */
+			if (queue->process == NULL){
+				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x53);
 #ifdef DEBUG
-    	xil_printf("not first on\n");
+				xil_printf("first process turned on \n");
 #endif
 
-      while (queue->nextProc != NULL){
-        queue = (procListT *) queue->nextProc;
-        //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x55);
-        }
-      /* end of list found so allocate a new list element */
-      if ((temp = (procListT *) malloc(sizeof(procListT))) == NULL)
-        return I_ERROR;
-      //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x56);
-      temp->nextProc = NULL;
-      temp->process = p_ptr;
-      queue->nextProc = (pointer) temp;
-      //XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x57);
-    } /* endif */
-    break;
+				queue->nextProc = NULL;
+				queue->process = p_ptr;
+
+			} else {    /* not first process, so add element to list */
+				/* find the end of the linked list */
+				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x54);
+#ifdef DEBUG
+				xil_printf("not first on\n");
+#endif
+
+				while (queue->nextProc != NULL){
+					queue = (procListT *) queue->nextProc;
+					//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x55);
+				}
+				/* end of list found so allocate a new list element */
+				if ((temp = (procListT *) malloc(sizeof(procListT))) == NULL)
+					return I_ERROR;
+				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x56);
+				temp->nextProc = NULL;
+				temp->process = p_ptr;
+				queue->nextProc = (pointer) temp;
+				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x57);
+			} /* endif */
+			break;
+
   case SBS_OFF:
     /* make sure it's on */
     if (p_ptr->status != SBS_ON){
@@ -1281,6 +1282,50 @@ void parseDLline(uint8_t *str)
 	break;
   }
 }
+
+#if !DEBUG
+/* TODO:
+ * --- This function extends traditional PBO by adding an EVALUATOR.
+ * --- NEED TO FIGURE OUT: API sbsEvaluator(processT *p_ptr, void * funcPerfBuffer; void *nonFuncPerfBuffer)?????
+ */
+int sbsEvaluator(processT *p_ptr)
+{
+//	procListT     *queue;
+	procListT     *spawned; //, *prevSpawn;
+//	procListT     *temp;
+//	int           i, tmp;
+
+//	queue = onQueueG;
+	spawned = spawnQueueG;
+//	prevSpawn = NULL;
+
+	/* Make sure it has been spawned */
+	if (spawned->process == NULL){
+		xil_printf("ERROR: the corresponding executor (PBO) is not spawned \r\n");
+		return I_ERROR;
+	}
+	if ((p_ptr == NULL) || (p_ptr->pid >= pidG)){
+		xil_printf("ERROR: the corresponding executor's (PBO) process ID is invalid \r\n");
+		return I_ERROR;
+	}
+
+	/* Make sure it's on */
+	if (p_ptr->status != SBS_ON){
+		xil_printf("ERROR: the corresponding executor (PBO) is not ON \r\n");
+		return I_ERROR;
+	}
+
+	/* Make sure EVALUATOR is defined */
+	if (p_ptr->eval_fptr == NULL){
+		xil_printf("ERROR: no evaluator defined \r\n");
+		return I_ERROR;
+	}
+
+	p_ptr->eval_fptr(p_ptr);
+
+	return I_OK;
+}
+#endif
 
 
 void sched()

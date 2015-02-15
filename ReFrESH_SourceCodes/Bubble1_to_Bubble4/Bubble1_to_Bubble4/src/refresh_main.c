@@ -22,6 +22,7 @@
 #include "menu.h"
 #include "visualServoTask.h"
 #include "actuator.h"
+#include "cc2520.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -80,16 +81,25 @@ int main()
 	xil_printf("%d\r\n", pTest[0]);
 #endif
 
-	sched_init(1000);
+
+	/* ******************************************************************** */
+	/*        CC2520    								    				*/
+	/* ******************************************************************** */
+//	initialize_zigbee(11, 0xAAAA, 0x11AA);
+//	sbsZigbeeRegister(othrBuf, 0x1111, 0x5432);
+
+
+	/* ******************************************************************** */
+	/*        PBO/RT init & PBO spawn   								    */
+	/* ******************************************************************** */
+	sched_init(100);
 
 	/* Spawn components */
-	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 20, 0, 0);
-
+	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 20, 0, 0); /* Spawn task firstly and the frequency should be set as the summation of all other PBOs */
 	camReaderIDG = sbsSpawn(camReader_init, 5, 0, 0);
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
 	actuatorIDG = sbsSpawn(actuator_init, 5, 0, 0);
-
 
 #if MENU_DEBUG
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);
@@ -128,7 +138,4 @@ int main()
 /* ********************************************************************************************************************************************* */
 /*     Local functions                                              																		 	 */
 /* ********************************************************************************************************************************************* */
-/* --- user_test_code() is for test a small piece of code outside of PBORT.
- * ---
- */
 
