@@ -56,6 +56,8 @@
 #define		FR_EST			215
 #define		NFR_EST			216
 #define		EST_DATA_IN		217
+#define		TYPE			218
+#define		LOCAL_STATE		219
 
 //typedef void interrupt (*hndlr_ptr)(void);
 typedef void (*voidfnc_ptr)();

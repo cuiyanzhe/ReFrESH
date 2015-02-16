@@ -15,7 +15,8 @@
 #include "pbort.h"
 #include "serial.h"
 #include "SSD.h"
-#include "compStructure.h"
+#include "refresh_main.h" /* test sbsGet func */
+//#include "compStructure.h"
 
 
 /* ********************************************************************************************************************************************* */
@@ -33,6 +34,9 @@
 #define TEMP_HEIGHT 3
 #define TEMP_WIDTH  3
 
+#define COMPUTATION  0
+#define SENSOR		 1
+#define ACTUATOR	 2
 
 /* ********************************************************************************************************************************************* */
 /*      global variable						                                              														 */
@@ -86,7 +90,7 @@ char SSD_on(processT *p_ptr)
 
 char SSD_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 {
-	PBOextendT  *pSSDLocal = (PBOextendT *)p_ptr->local;
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
 
 	switch(type){
 		case DATA_IN:
@@ -149,7 +153,7 @@ char SSD_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 {
-	PBOextendT  *pSSDLocal = (PBOextendT *)p_ptr->local;
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
 
 	switch(type){
 		case DATA_IN:
@@ -179,6 +183,16 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 		case EST_OUTPUT:
 			*((uint16_t *)vptr) = *(pSSDLocal->estOutPtr);
+			return I_OK;
+		break;
+
+		case TYPE:
+			*((uint8_t *)vptr) = pSSDLocal->type;
+			return I_OK;
+		break;
+
+		case LOCAL_STATE:
+			*((uint8_t *)vptr) = pSSDLocal->ssdState;
 			return I_OK;
 		break;
 		/* ---TODO:
@@ -214,7 +228,7 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 char SSD_cycle(processT *p_ptr)
 {
-	PBOextendT  *pSSDLocal = (PBOextendT *)p_ptr->local;
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
 
 	short 	tmpShort;
 	char	tmpChar;
@@ -257,7 +271,7 @@ char SSD_cycle(processT *p_ptr)
 	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
 #endif
 
-	ssdState = 2;
+	pSSDLocal->ssdState = 2;
 
 	return I_OK;
 
@@ -285,18 +299,19 @@ char SSD_init(processT *p_ptr, void*vptr)
 
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */
-	if((p_ptr->local = (pointer)malloc(sizeof(PBOextendT))) == NULL){
+	if((p_ptr->local = (pointer)malloc(sizeof(ssd_localT))) == NULL){
 			return I_ERROR;
 	}
 
 	/* define a pointer points to local structure */
-//	PBOextendT  *pSSDLocal = (PBOextendT *)p_ptr->local;
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
 //	pSSDLocal->inPtr = &inValG;
 
 
 #endif
 
-	ssdState = 0;
+	pSSDLocal->ssdState = 0;
+	pSSDLocal->type = COMPUTATION;
 
 	return I_OK;
 }

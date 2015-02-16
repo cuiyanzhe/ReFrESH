@@ -14,7 +14,7 @@
 #include <stdlib.h>		/* for malloc() */
 #include "pbort.h"
 #include "serial.h"
-#include "compStructure.h"
+//#include "compStructure.h"
 #include "trajGen.h"
 
 
@@ -32,6 +32,10 @@
 #define IMG_WIDTH  10
 #define TEMP_HEIGHT 3
 #define TEMP_WIDTH  3
+
+#define COMPUTATION  0
+#define SENSOR		 1
+#define ACTUATOR	 2
 
 /* ********************************************************************************************************************************************* */
 /*      global variable						                                              														 */
@@ -54,7 +58,7 @@ char trajGen_on(processT *p_ptr)
 
 char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 {
-	PBOextendT  *pTrajGenLocal = (PBOextendT *)p_ptr->local;
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
 	
 	switch(type){
 		case DATA_IN:
@@ -105,12 +109,87 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 
 /* ******************************************************************** */
+/*       trajGen_get                      Get parameter from local.     */
+/* ******************************************************************** */
+
+char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
+{
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
+
+	switch(type){
+		case DATA_IN:
+			*((uint8_t *)vptr) = *(pTrajGenLocal->inPtr);
+			return I_OK;
+		break;
+
+		case DATA_OUT:
+			*((uint16_t *)vptr) = *(pTrajGenLocal->outPtr);
+			return I_OK;
+		break;
+
+		case IN_SIZE:
+			*((size_t *)vptr) = sizeof(pTrajGenLocal->inPtr);
+			return I_OK;
+		break;
+
+		case OUT_SIZE:
+			*((size_t *)vptr) = sizeof(pTrajGenLocal->outPtr);
+			return I_OK;
+		break;
+
+		case EST_INPUT:
+			*((uint8_t *)vptr) = *(pTrajGenLocal->estInPtr);
+			return I_OK;
+		break;
+
+		case EST_OUTPUT:
+			*((uint16_t *)vptr) = *(pTrajGenLocal->estOutPtr);
+			return I_OK;
+		break;
+
+		case TYPE:
+			*((uint8_t *)vptr) = pTrajGenLocal->type;
+			return I_OK;
+		break;
+
+		case LOCAL_STATE:
+			*((uint8_t *)vptr) = pTrajGenLocal->trajState;
+			return I_OK;
+		break;
+		/* ---TODO:
+		 * This part is for EVLAUATOR, uncomment this part after test each single component
+		 */
+#if EVAL_TEST
+		case FR_EVAL:
+			*((uint16_t *)vptr) = pSSDLocal->FR_Eval;
+			return I_OK;
+		break;
+		case FR_EST:
+			*((uint16_t *)vptr) = pSSDLocal->FR_Est;
+			return I_OK;
+		break;
+		case NFR_EVAL:
+			*((uint16_t *)vptr) = pSSDLocal->NFR_Eval;
+			return I_OK;
+		break;
+		case NFR_EST:
+			*((uint16_t *)vptr) = pSSDLocal->NFR_Est;
+			return I_OK;
+		break;
+#endif
+	}
+
+	return I_OK;
+}
+
+
+/* ******************************************************************** */
 /*       SSD_cycle              Trajectory generation.                  */
 /* ******************************************************************** */
 
 char trajGen_cycle(processT *p_ptr)
 {
-	PBOextendT  *pTrajGenLocal = (PBOextendT *)p_ptr->local;
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
 	
 	uint8_t imgCenter = IMG_WIDTH / 2;
 
@@ -143,7 +222,7 @@ char trajGen_cycle(processT *p_ptr)
 	}
 #endif
 
-	trajState = 2;
+	pTrajGenLocal->trajState = 2;
 
 	return I_OK;
 }
@@ -159,14 +238,19 @@ char trajGen_init(processT *p_ptr, void*vptr)
 	p_ptr->cycle_fptr = trajGen_cycle;
 	p_ptr->off_fptr = NULL;
 	p_ptr->set_fptr = trajGen_set;
+	p_ptr->get_fptr = trajGen_get;
 	
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */
-	if((p_ptr->local = (pointer)malloc(sizeof(PBOextendT))) == NULL){
+	if((p_ptr->local = (pointer)malloc(sizeof(trajGen_localT))) == NULL){
 			return I_ERROR;
 	}
 	
-	trajState = 0;
+	/* define a pointer points to local structure */
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
+
+	pTrajGenLocal->trajState = 0;
+	pTrajGenLocal->type = COMPUTATION;
 
 	return I_OK;
 }

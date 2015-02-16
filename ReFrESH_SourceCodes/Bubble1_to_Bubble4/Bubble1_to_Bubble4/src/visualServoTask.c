@@ -52,11 +52,6 @@ uint8_t tempPosBufferG[2];	/* X & Y location in image frame, 2 bytes */
 
 char visualServoTask_on(processT *p_ptr)
 {
-	task_localT  *local = (task_localT *)p_ptr->local;
-
-	local->state = 0;
-//	template_cnt = 0;
-
 	return I_OK;
 }
 
@@ -68,23 +63,22 @@ char visualServoTask_on(processT *p_ptr)
 char visualServoTask_cycle(processT *p_ptr)
 {
 	task_localT  *local = (task_localT *)p_ptr->local;
+	uint8_t camReaderState;
+	uint8_t ssdState;
+	uint8_t trajGenState;
+	uint8_t actuatorState;
 
 	switch(local->state){
-		case 0:	/* camReader */
-			/*if(!sbsControl(camReaderIDG, SBS_ON)){
-				sbsControl(camReaderIDG, SBS_ON);
-			}
-			if(!sbsControl(ssdIDG, SBS_ON)){
-				sbsControl(ssdIDG, SBS_ON);
-			}*/
+		case 0:	/* Acquire an image from camera */
+			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderState);
 
-			if(cameraState == 0){
-				sbsControl(camReaderIDG, SBS_ON);
+			if(camReaderState == 0){
 				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+				sbsControl(camReaderIDG, SBS_ON);
 
-				cameraState = 1;
-			}else if(cameraState == 2){
-				cameraState = 0;
+				camReaderState = 1;
+			}else if(camReaderState == 2){
+				camReaderState = 0;
 				local->state = 1;
 			}
 #if DEBUG
@@ -103,7 +97,7 @@ char visualServoTask_cycle(processT *p_ptr)
 			sbsControl(camReaderIDG, SBS_OFF);
 			sbsControl(ssdIDG, SBS_OFF);
 #endif
-			sbsEvaluator(camReaderIDG);
+//			sbsEvaluator(camReaderIDG);  /* why?? */
 
 			local->state = 1;
 		break;
@@ -113,11 +107,13 @@ char visualServoTask_cycle(processT *p_ptr)
 				sbsControl(trajGenIDG, SBS_ON);
 			}*/
 
-			if(ssdState == 0){
-				sbsControl(ssdIDG, SBS_ON);
+			sbsGet(ssdIDG, LOCAL_STATE, 0, (void *)&ssdState);
 
+			if(ssdState == 0){
 				sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
 				sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
+
+				sbsControl(ssdIDG, SBS_ON);
 
 				ssdState = 1;
 			}else if(ssdState == 2){
@@ -135,18 +131,22 @@ char visualServoTask_cycle(processT *p_ptr)
 		break;
 
 		case 2: /* Trajectory Generation */
-			if(trajState == 0){
-				sbsControl(trajGenIDG, SBS_ON);
+			sbsGet(trajGenIDG, LOCAL_STATE, 0, (void *)&trajGenState);
 
+			if(trajGenState == 0){
 				sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
 
-				trajState = 1;
-			}else if(trajState == 2){
-				trajState = 0;
+				sbsControl(trajGenIDG, SBS_ON);
+
+				trajGenState = 1;
+			}else if(trajGenState == 2){
+				trajGenState = 0;
 				local->state = 2;
 			}
 
 		case 3: /* Move to Target */
+			sbsGet(actuatorIDG, LOCAL_STATE, 0, (void *)&actuatorState);
+
 			if(actuatorState == 0){
 				sbsControl(actuatorIDG, SBS_ON);
 
@@ -188,6 +188,10 @@ char visualServoTask_init(processT *p_ptr, void *vptr)
 	if((p_ptr->local = (pointer)malloc(sizeof(task_localT))) == NULL){
 		return I_ERROR;
 	}
+
+	task_localT  *local = (task_localT *)p_ptr->local;
+
+	local->state = 0;
 
 	return I_OK;
 }

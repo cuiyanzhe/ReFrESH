@@ -79,6 +79,7 @@ char menu_cycle(processT *p_ptr)
 {
 	unsigned char str[10];
 	uint8_t n;
+	uint8_t testGet;
 
 	/* look for incoming serial commands */
 	if (serRecvChk1() != 0){
@@ -89,6 +90,8 @@ char menu_cycle(processT *p_ptr)
 			 * or you can run SBS_SET_TEST_ON firstly. Otherwise, the pointers are not initialized */
 			case CAMERA_READER_ON:
 				xil_printf("Turn on camReader component to test!\r\n");
+				sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&testGet);
+				xil_printf("Test get: %d\r\n", testGet);
 				sbsControl(camReaderIDG,SBS_ON);
 			break;
 
@@ -99,6 +102,7 @@ char menu_cycle(processT *p_ptr)
 
 			case  SSD_ON:
 				xil_printf("Turn on SSD component to test!\r\n");
+
 				sbsControl(ssdIDG,SBS_ON);
 			break;
 
@@ -124,11 +128,6 @@ char menu_cycle(processT *p_ptr)
 				sbsControl(ssdIDG, SBS_OFF);
 				sbsControl(trajGenIDG, SBS_OFF);
 
-				/* Turn on components */
-				sbsControl(camReaderIDG, SBS_ON);
-				sbsControl(ssdIDG, SBS_ON);
-				sbsControl(trajGenIDG, SBS_ON);
-
 				/* Connect components manually */
 				uint8_t *imgBuffer = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
 				uint8_t *tempPosBuffer = (uint8_t*)malloc(2);	/* X & Y location in image frame, 2 bytes */
@@ -137,6 +136,11 @@ char menu_cycle(processT *p_ptr)
 				sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBuffer);
 				sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBuffer);
 				sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBuffer);
+
+				/* Turn on components */
+				sbsControl(camReaderIDG, SBS_ON);
+				sbsControl(ssdIDG, SBS_ON);
+				sbsControl(trajGenIDG, SBS_ON);
 			break;
 
 			case SBS_SET_TEST_OFF:
@@ -215,6 +219,7 @@ char menu_cycle(processT *p_ptr)
 #endif
 		}
 	}
+	return I_OK;
 }
 
 /* ******************************************************************** */

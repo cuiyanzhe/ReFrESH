@@ -618,10 +618,11 @@ int sbsGet(processT *p_ptr, int type, int arg, void *vptr)
       strcpy((char *)vptr, p_ptr->modName);
       break;
     default:
-      if (p_ptr->get_fptr != NULL)
-	return (p_ptr->get_fptr(p_ptr, type, arg, vptr));
+      if (p_ptr->get_fptr != NULL){
+    	  return (p_ptr->get_fptr(p_ptr, type, arg, vptr));
+      }
       else
-	return I_ERROR;
+    	  return I_ERROR;
   } /* endswitch */
 
   return I_OK;
@@ -1316,7 +1317,9 @@ int sbsEvaluator(processT *p_ptr)
 		return I_ERROR;
 	}
 
-	p_ptr->eval_fptr(p_ptr);
+	p_ptr->eval_fptr(p_ptr);   /* API discuss: (1) int sbsEvaluator(processT *p_ptr, void *vptr1, void *vptr2);
+											   (2) typedef char (*evalfnc_ptr)(processT*, void*, void*);
+	                                           (3) p_ptr->eval_fptr(p_ptr, funcBuf, nonfuncBuf);*/
 
 	return I_OK;
 }
