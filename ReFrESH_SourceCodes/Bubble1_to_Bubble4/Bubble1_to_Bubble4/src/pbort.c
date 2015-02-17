@@ -25,20 +25,17 @@
 #include <string.h>
 #include "xparameters.h"
 #include "xtime_l.h"
-//#include <xexception_l.h>
 #include "xexception_l.h"
-//#include <xstatus.h>
-//#include "intr.h"
-//#include "xtmrctr_l.h"
-//#include "vtypes.h"
 #include "pbort.h"
 #include "serial.h"
 #include "compStructure.h"
+#include "cc2520.h"
+//#include "intr.h"
+//#include "xtmrctr_l.h"
+//#include "vtypes.h"
 //#include "database.h"
-//#include "cc2520.h"
-#define UARTLITE_BASEADDRESS XPAR_UARTLITE_0_BASEADDR
 
-//#include "cc2520.h"
+#define UARTLITE_BASEADDRESS XPAR_UARTLITE_0_BASEADDR
 
 #define MAX_READY       32
 const unsigned char myNodeG = 1;
@@ -628,6 +625,43 @@ int sbsGet(processT *p_ptr, int type, int arg, void *vptr)
   return I_OK;
 }
 
+/*---YC: create this API to obtain from other nodes by using Zigbee 02/16/2015 */
+int sbsRemoteGet(processT *p_ptr, uint8_t *ptr, int type, int arg, void *vptr, uint16_t len)
+{
+	/* sbsZigbeeSend(uint16_t destPan, uint16_t destAddr, uint8_t * Tx_Message, uint16_t len);
+	 * destPan, destAddr should be defined in the local structure of manageUnit.h
+	 * */
+	//sbsGet(p_ptr, PANID, 0, vptr);
+	//sbsZigbeeSend(uint16_t destPan, uint16_t destAddr, uint8_t * Tx_Message, uint16_t len);
+
+	switch(type){
+		case SBS_FREQ:
+		  *((float *)vptr) = p_ptr->freq;
+		  break;
+
+		case SBS_NTICKS:
+		  *((long *)vptr) = p_ptr->nPeriod;
+		  break;
+
+		case SBS_MISSED:
+		  *((short *)vptr) = p_ptr->missed;
+		  break;
+
+		case SBS_NAME:
+		  strcpy((char *)vptr, p_ptr->modName);
+		  break;
+
+		default:
+		  if (p_ptr->get_fptr != NULL){
+			  return (p_ptr->get_fptr(p_ptr, type, arg, vptr));
+		  }
+		  else
+			  return I_ERROR;
+  } /* endswitch */
+
+  return I_OK;
+}
+
 int sbsSet(processT *p_ptr, int type, int arg, void *vptr)
 {
   unsigned long per;
@@ -726,6 +760,7 @@ int sbsListMods()
   return I_OK;
 }
 
+#if DEBUG
 /********Parse OS Command************/					//Added by JTL 10/23/14 to support internode communication using the same method as code migration
 void parseOSCmd(uint8_t *str)
 {
@@ -1283,13 +1318,14 @@ void parseDLline(uint8_t *str)
 	break;
   }
 }
+#endif
 
 #if !DEBUG
 /* TODO:
  * --- This function extends traditional PBO by adding an EVALUATOR.
  * --- NEED TO FIGURE OUT: API sbsEvaluator(processT *p_ptr, void * funcPerfBuffer; void *nonFuncPerfBuffer)?????
  */
-int sbsEvaluator(processT *p_ptr)
+int sbsEvaluator(processT *p_ptr, int type, int arg, void *vptr)
 {
 	procListT     *spawned;
 
@@ -1317,9 +1353,7 @@ int sbsEvaluator(processT *p_ptr)
 		return I_ERROR;
 	}
 
-	p_ptr->eval_fptr(p_ptr);   /* API discuss: (1) int sbsEvaluator(processT *p_ptr, void *vptr1, void *vptr2);
-											   (2) typedef char (*evalfnc_ptr)(processT*, void*, void*);
-	                                           (3) p_ptr->eval_fptr(p_ptr, funcBuf, nonfuncBuf);*/
+	p_ptr->eval_fptr(p_ptr, type, arg, vptr);
 
 	return I_OK;
 }

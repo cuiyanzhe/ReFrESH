@@ -82,15 +82,15 @@ char camReader_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			pCamReaderLocal->estInPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			pCamReaderLocal->estOutPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			pCamReaderLocal->estInPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			pCamReaderLocal->estOutPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
 
 /*		case FR_EVAL:
 			local->FR_Eval = *((uint16_t *)vptr);
@@ -146,15 +146,15 @@ char camReader_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			*((uint8_t *)vptr) = *(pCamReaderLocal->estInPtr);
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			*((uint16_t *)vptr) = *(pCamReaderLocal->estOutPtr);
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			*((uint8_t *)vptr) = *(pCamReaderLocal->estInPtr);
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			*((uint16_t *)vptr) = *(pCamReaderLocal->estOutPtr);
+//			return I_OK;
+//		break;
 
 		case TYPE:
 			*((uint8_t *)vptr) = pCamReaderLocal->type;
@@ -163,6 +163,11 @@ char camReader_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 		case LOCAL_STATE:
 			*((uint8_t *)vptr) = pCamReaderLocal->cameraState;
+			return I_OK;
+		break;
+
+		case NODE_NUM:
+			*((uint8_t *)vptr) = pCamReaderLocal->nodeNum;
 			return I_OK;
 		break;
 
@@ -251,14 +256,24 @@ char camReader_cycle(processT *p_ptr)
 
 
 /* ******************************************************************** */
-/*       camReader_cycle              Get the frame.                    */
+/*       camReader_eval              Obtain required parameters.        */
 /* ******************************************************************** */
 
-char camReader_eval(processT *p_ptr)
+char camReader_eval(processT *p_ptr, int type, int arg, void *vptr)
 {
 	camReader_localT  *pCamReaderLocal = (camReader_localT *)p_ptr->local;
-	pCamReaderLocal->power = 50;
-	xil_printf("Power usage of camReader is: %d\r\n", pCamReaderLocal->power);
+
+	switch(type){
+		case POWER:
+			*((uint8_t *)vptr) = pCamReaderLocal->power;
+			return I_OK;
+		break;
+
+		case LINK_RSSI:
+			*((int *)vptr) = pCamReaderLocal->commuRSSI;
+			return I_OK;
+		break;
+	}
 
 	return I_OK;
 }
@@ -292,7 +307,11 @@ char camReader_init(processT *p_ptr, void *vptr)
 //	pCamReaderLocal->outPtr = (uint8_t*)malloc(IMG_HEIGHT * IMG_WIDTH);
 
 	pCamReaderLocal->cameraState = 0;
+
 	pCamReaderLocal->type = SENSOR;
+	pCamReaderLocal->power = 10;	/* required power of camReader */
+	pCamReaderLocal->commuRSSI = 10; /* minimum RSSI if camReader is on the different node as SSD */
+	pCamReaderLocal->nodeNum = 1;	/* camReader on NODE 1 */
 
 	return I_OK;
 }

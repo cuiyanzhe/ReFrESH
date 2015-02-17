@@ -42,12 +42,12 @@
 //#define		OUT_SIZE		211
 //#define		TEMP_COUNT		212
 
-#define		TRACK_EST		204
-#define		TRACK_EVAL		205
+//#define		TRACK_EST		204
+//#define		TRACK_EVAL		205
 #define		DATA_IN			206
 #define		DATA_OUT		207
-#define		EST_INPUT		208
-#define		EST_OUTPUT		209
+//#define		EST_INPUT		208
+//#define		EST_OUTPUT		209
 #define		IN_SIZE		  	210
 #define		OUT_SIZE		211
 #define		TEMP_COUNT		212
@@ -58,6 +58,11 @@
 #define		EST_DATA_IN		217
 #define		TYPE			218
 #define		LOCAL_STATE		219
+#define		POWER			220
+#define		LINK_RSSI		221
+#define		FUNC_PERF		222
+#define		NODE_NUM		204
+#define		PANID			205
 
 //typedef void interrupt (*hndlr_ptr)(void);
 typedef void (*voidfnc_ptr)();
@@ -70,13 +75,13 @@ typedef void *pointer;
 typedef struct{ charfnc_ptr     on_fptr;
                 charfnc_ptr     cycle_fptr;
                 charfnc_ptr     off_fptr;
-                charfnc_ptr		eval_fptr;		/* ??????? YC added to support EVALUATOR 02/15/2015 */
+//                charfnc_ptr		eval_fptr;		/* ??????? YC added to support EVALUATOR 02/15/2015 */
                 charfnc_ptr     kill_fptr;
 //	            charfnc_ptr     get_fptr;
 //	            charfnc_ptr     set_fptr;
                 setfnc_ptr 		get_fptr;
                 setfnc_ptr 		set_fptr;
-//                charfnc_ptr		eval_fptr;	/* ??????? YC added to support EVALUATOR 02/15/2015 */
+                setfnc_ptr		eval_fptr;	/* ??????? YC added to support EVALUATOR 02/15/2015 */
 		        unsigned long   pid;
                 short           status;
                 short           criticality;
@@ -115,8 +120,10 @@ extern processT *sbsModPtr(char *mname);
 /* --- sbsListMods prints a list of module names. */
 extern int sbsListMods();
 
-/* YC adds this for EVALUATOR 02/15/2015 */
-extern int sbsEvaluator(processT *p_ptr);
+/* ---YC adds this for EVALUATOR 02/15/2015
+ * ---YC modifies this API the same as sbsGet 02/16/2015
+ */
+int sbsEvaluator(processT *p_ptr, int type, int arg, void *vptr);
 
 extern procListT *spawnQueueG;
 

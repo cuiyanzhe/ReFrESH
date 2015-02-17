@@ -15,6 +15,7 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
 char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
 char trajGen_cycle(processT *p_ptr);
 char trajGen_init(processT *p_ptr, void*vptr);
+char trajGen_eval(processT *p_ptr, int type, int arg, void *vptr);
 
 //uint8_t trajState;
 

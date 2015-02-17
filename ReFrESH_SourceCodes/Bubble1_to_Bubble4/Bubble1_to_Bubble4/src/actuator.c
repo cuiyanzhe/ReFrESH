@@ -69,15 +69,15 @@ char actuator_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			*((uint8_t *)vptr) = *(pActuatorLocal->estInPtr);
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			*((uint16_t *)vptr) = *(pActuatorLocal->estOutPtr);
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			*((uint8_t *)vptr) = *(pActuatorLocal->estInPtr);
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			*((uint16_t *)vptr) = *(pActuatorLocal->estOutPtr);
+//			return I_OK;
+//		break;
 
 		case TYPE:
 			*((uint8_t *)vptr) = pActuatorLocal->type;
@@ -86,6 +86,11 @@ char actuator_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 		case LOCAL_STATE:
 			*((uint8_t *)vptr) = pActuatorLocal->actuatorState;
+			return I_OK;
+		break;
+
+		case NODE_NUM:
+			*((uint8_t *)vptr) = pActuatorLocal->nodeNum;
 			return I_OK;
 		break;
 		/* ---TODO:
@@ -138,6 +143,35 @@ char actuator_cycle(processT *p_ptr)
 }
 
 
+
+/* ******************************************************************** */
+/*      actuator_eval                obtain required parameters.        */
+/* ******************************************************************** */
+
+char actuator_eval(processT *p_ptr, int type, int arg, void *vptr)
+{
+	actuator_localT  *pActuatorLocal = (actuator_localT *)p_ptr->local;
+
+	switch(type){
+		case POWER:
+			*((uint8_t *)vptr) = pActuatorLocal->power;
+			return I_OK;
+		break;
+
+		case LINK_RSSI:
+			*((int *)vptr) = pActuatorLocal->commuRSSI;
+			return I_OK;
+		break;
+
+		case FUNC_PERF:
+			*((uint8_t *)vptr) = pActuatorLocal->funcPerfValue;
+		break;
+	}
+
+	return I_OK;
+}
+
+
 /* ******************************************************************** */
 /*        actuator_init                 Initiate module information.    */
 /* ******************************************************************** */
@@ -148,6 +182,7 @@ char actuator_init(processT *p_ptr, void *vptr)
 	p_ptr->cycle_fptr = actuator_cycle;
 	p_ptr->off_fptr = NULL;
 	p_ptr->get_fptr = actuator_get;
+	p_ptr->eval_fptr = actuator_eval;
 
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */
@@ -160,6 +195,9 @@ char actuator_init(processT *p_ptr, void *vptr)
 
 	pActuatorLocal->actuatorState = 0;
 	pActuatorLocal->type = ACTUATOR;
+	pActuatorLocal->power = 15;	/* required power of trajGen */
+	pActuatorLocal->commuRSSI = 4; /* minimum RSSI */
+	pActuatorLocal->nodeNum = 1; /* actuator on NODE 1 */
 
 	return I_OK;
 }

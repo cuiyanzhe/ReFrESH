@@ -25,6 +25,7 @@ extern processT *ssdIDG;
 extern processT *trajGenIDG;
 extern processT *visualServoTaskIDG;
 extern processT *actuatorIDG;
+extern processT *manageUnitIDG;
 
 
 

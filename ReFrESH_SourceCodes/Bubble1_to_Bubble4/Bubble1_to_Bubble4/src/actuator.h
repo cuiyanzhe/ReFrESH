@@ -13,6 +13,7 @@
 char actuator_on(processT *p_ptr);
 char actuator_cycle(processT *p_ptr);
 char actuator_init(processT *p_ptr, void *vptr);
+char actuator_eval(processT *p_ptr, int type, int arg, void *vptr);
 
 //uint8_t actuatorState;
 

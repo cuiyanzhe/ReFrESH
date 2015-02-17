@@ -103,15 +103,15 @@ char SSD_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			pSSDLocal->estInPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			pSSDLocal->estOutPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			pSSDLocal->estInPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			pSSDLocal->estOutPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
 
 		/* ---TODO:
 		 * This part is for EVLAUATOR, uncomment this part after test each single component
@@ -176,15 +176,15 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			*((uint8_t *)vptr) = *(pSSDLocal->estInPtr);
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			*((uint16_t *)vptr) = *(pSSDLocal->estOutPtr);
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			*((uint8_t *)vptr) = *(pSSDLocal->estInPtr);
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			*((uint16_t *)vptr) = *(pSSDLocal->estOutPtr);
+//			return I_OK;
+//		break;
 
 		case TYPE:
 			*((uint8_t *)vptr) = pSSDLocal->type;
@@ -193,6 +193,11 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 		case LOCAL_STATE:
 			*((uint8_t *)vptr) = pSSDLocal->ssdState;
+			return I_OK;
+		break;
+
+		case NODE_NUM:
+			*((uint8_t *)vptr) = pSSDLocal->nodeNum;
 			return I_OK;
 		break;
 		/* ---TODO:
@@ -269,12 +274,44 @@ char SSD_cycle(processT *p_ptr)
 	pSSDLocal->outPtr[0] = targetXLoc;
 	pSSDLocal->outPtr[1] = targetYLoc;
 	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
+
+	/* This calculation is for EVALUATOR */
+	pSSDLocal->funcPerfValue = 100 * (TEMP_HEIGHT * TEMP_WIDTH * 255 - errorImg) / (TEMP_HEIGHT * TEMP_WIDTH * 255); /* normalized SSD error, the higher value means the better performance */
+//	xil_printf("The func performance of SSD is: %d\r\n", pSSDLocal->funcPerfValue);
 #endif
 
 	pSSDLocal->ssdState = 2;
 
 	return I_OK;
 
+}
+
+
+/* ******************************************************************** */
+/*       SSD_eval                    Obtain required parameters.        */
+/* ******************************************************************** */
+
+char SSD_eval(processT *p_ptr, int type, int arg, void *vptr)
+{
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
+
+	switch(type){
+		case POWER:
+			*((uint8_t *)vptr) = pSSDLocal->power;
+			return I_OK;
+		break;
+
+		case LINK_RSSI:
+			*((int *)vptr) = pSSDLocal->commuRSSI;
+			return I_OK;
+		break;
+
+		case FUNC_PERF:
+			*((uint8_t *)vptr) = pSSDLocal->funcPerfValue;
+		break;
+	}
+
+	return I_OK;
 }
 
 
@@ -287,12 +324,7 @@ char SSD_init(processT *p_ptr, void*vptr)
 	p_ptr->on_fptr = SSD_on;
 	p_ptr->cycle_fptr = SSD_cycle;
 	p_ptr->off_fptr = NULL;
-
-	//p_ptr->eval_fptr = SSD_eval;
-
-#if DEBUG
-	xil_printf("(SSD_init)Debug the affection of SET function\r\n");
-#else
+	p_ptr->eval_fptr = SSD_eval;
 	p_ptr->set_fptr = SSD_set;
 	p_ptr->get_fptr = SSD_get;
 
@@ -305,13 +337,12 @@ char SSD_init(processT *p_ptr, void*vptr)
 
 	/* define a pointer points to local structure */
 	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
-//	pSSDLocal->inPtr = &inValG;
-
-
-#endif
 
 	pSSDLocal->ssdState = 0;
 	pSSDLocal->type = COMPUTATION;
+	pSSDLocal->power = 35;	/* required power of SSD */
+	pSSDLocal->commuRSSI = 10; /* minimum RSSI if SSD is on the different node as camReader */
+	pSSDLocal->nodeNum = 1;	/* SSD on NODE 1 */
 
 	return I_OK;
 }

@@ -22,6 +22,7 @@
 #include "menu.h"
 #include "visualServoTask.h"
 #include "actuator.h"
+#include "manageUnit.h"
 #include "cc2520.h"
 
 /* ********************************************************************************************************************************************* */
@@ -41,6 +42,7 @@ processT *trajGenIDG;
 processT *menuIDG;
 processT *visualServoTaskIDG;
 processT *actuatorIDG;
+processT *manageUnitIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -83,28 +85,34 @@ int main()
 
 
 	/* ******************************************************************** */
-	/*        CC2520    								    				*/
-	/* ******************************************************************** */
-//	initialize_zigbee(11, 0xAAAA, 0x11AA);
-//	sbsZigbeeRegister(othrBuf, 0x1111, 0x5432);
-
-
-	/* ******************************************************************** */
 	/*        PBO/RT init & PBO spawn   								    */
 	/* ******************************************************************** */
-	sched_init(100);
+	sched_init(200);
 
 	/* Spawn components */
-	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 20, 0, 0); /* Spawn task firstly and the frequency should be set as the summation of all other PBOs */
+	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 50, 0, 0); /* Spawn task firstly and the frequency should be set as the summation of all other PBOs */
 	camReaderIDG = sbsSpawn(camReader_init, 5, 0, 0);
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
 	actuatorIDG = sbsSpawn(actuator_init, 5, 0, 0);
-
-#if MENU_DEBUG
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);
+	manageUnitIDG = sbsSpawn(manageUnit_init, 5, 0, 0);
+
+
+//	sbsControl(camReaderIDG, SBS_ON);
+//	sbsControl(ssdIDG, SBS_ON);
+//	sbsControl(trajGenIDG, SBS_ON);
+//	sbsControl(actuatorIDG, SBS_ON);
+
 	sbsControl(menuIDG, SBS_ON);
-#endif
+
+
+	/* ******************************************************************** */
+	/*        CC2520    								    				*/
+	/* ******************************************************************** */
+	initialize_zigbee(11, 0xAAAA, 0x11AA);
+	sbsZigbeeRegister(othrBuf, 0x1111, 0x5432);
+
 
 #if DEBUG
 	/* Turn on components */

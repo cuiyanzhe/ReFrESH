@@ -71,15 +71,15 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			pTrajGenLocal->estInPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			pTrajGenLocal->estOutPtr = (uint8_t *)vptr;
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			pTrajGenLocal->estInPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			pTrajGenLocal->estOutPtr = (uint8_t *)vptr;
+//			return I_OK;
+//		break;
 
 		/* ---TODO:
 		 * This part is for EVLAUATOR, uncomment this part after test each single component
@@ -137,15 +137,15 @@ char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-		case EST_INPUT:
-			*((uint8_t *)vptr) = *(pTrajGenLocal->estInPtr);
-			return I_OK;
-		break;
-
-		case EST_OUTPUT:
-			*((uint16_t *)vptr) = *(pTrajGenLocal->estOutPtr);
-			return I_OK;
-		break;
+//		case EST_INPUT:
+//			*((uint8_t *)vptr) = *(pTrajGenLocal->estInPtr);
+//			return I_OK;
+//		break;
+//
+//		case EST_OUTPUT:
+//			*((uint16_t *)vptr) = *(pTrajGenLocal->estOutPtr);
+//			return I_OK;
+//		break;
 
 		case TYPE:
 			*((uint8_t *)vptr) = pTrajGenLocal->type;
@@ -154,6 +154,11 @@ char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 
 		case LOCAL_STATE:
 			*((uint8_t *)vptr) = pTrajGenLocal->trajState;
+			return I_OK;
+		break;
+
+		case NODE_NUM:
+			*((uint8_t *)vptr) = pTrajGenLocal->nodeNum;
 			return I_OK;
 		break;
 		/* ---TODO:
@@ -229,6 +234,34 @@ char trajGen_cycle(processT *p_ptr)
 
 
 /* ******************************************************************** */
+/*       trajGen_eval                obtain required parameters.        */
+/* ******************************************************************** */
+
+char trajGen_eval(processT *p_ptr, int type, int arg, void *vptr)
+{
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
+
+	switch(type){
+		case POWER:
+			*((uint8_t *)vptr) = pTrajGenLocal->power;
+			return I_OK;
+		break;
+
+		case LINK_RSSI:
+			*((int *)vptr) = pTrajGenLocal->commuRSSI;
+			return I_OK;
+		break;
+
+		case FUNC_PERF:
+			*((uint8_t *)vptr) = pTrajGenLocal->funcPerfValue;
+		break;
+	}
+
+	return I_OK;
+}
+
+
+/* ******************************************************************** */
 /*        trajGen_init             Initiate module information.         */
 /* ******************************************************************** */
 
@@ -239,6 +272,7 @@ char trajGen_init(processT *p_ptr, void*vptr)
 	p_ptr->off_fptr = NULL;
 	p_ptr->set_fptr = trajGen_set;
 	p_ptr->get_fptr = trajGen_get;
+	p_ptr->eval_fptr = trajGen_eval;
 	
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */
@@ -251,6 +285,9 @@ char trajGen_init(processT *p_ptr, void*vptr)
 
 	pTrajGenLocal->trajState = 0;
 	pTrajGenLocal->type = COMPUTATION;
+	pTrajGenLocal->power = 25;	/* required power of trajGen */
+	pTrajGenLocal->commuRSSI = 5; /* minimum RSSI */
+	pTrajGenLocal->nodeNum = 1; /* trajGen on NODE 1 */
 
 	return I_OK;
 }
