@@ -11,6 +11,8 @@
 #ifndef VISUALSERVOTASK_H_
 #define VISUALSERVOTASK_H_
 
+#include "pbort.h"
+
 typedef struct{
 	uint8_t	state;			/* flag indicating which state the TASK is in */
 } task_localT;
@@ -18,5 +20,7 @@ typedef struct{
 char visualServoTask_on(processT *p_ptr);
 char visualServoTask_cycle(processT *p_ptr);
 char visualServoTask_init(processT *p_ptr, void *vptr);
+
+extern processT *processG;
 
 #endif /* VISUALSERVOTASK_H_ */

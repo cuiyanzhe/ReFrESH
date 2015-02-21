@@ -21,6 +21,8 @@
 #include "trajGen.h"
 #include "actuator.h"
 
+#include "SSD_new.h"
+
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -73,24 +75,28 @@ char visualServoTask_cycle(processT *p_ptr)
 {
 	task_localT  *local = (task_localT *)p_ptr->local;
 
+//	sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+//	sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
+//	sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
+
 	switch(local->state){
 		case 0:	/* Acquire an image from camera */
-//			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderStateG);
-//
-//			if(camReaderStateG == 0){
-//				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
-//				sbsControl(camReaderIDG, SBS_ON);
-//
-//				camReaderStateG = 1;
-//			}else if(camReaderStateG == 2){
-//				camReaderStateG = 0;
-//				local->state = 1;
-//			}
-
 			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderStateG);
 
-			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
-			sbsControl(camReaderIDG, SBS_ON);
+			if(camReaderStateG == 0){
+				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+				sbsControl(camReaderIDG, SBS_ON);
+
+				camReaderStateG = 1;
+			}else if(camReaderStateG == 2){
+				camReaderStateG = 0;
+				local->state = 1;
+			}
+
+//			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderStateG);
+//
+////			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+//			sbsControl(camReaderIDG, SBS_ON);
 
 
 //			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderStateG);
@@ -129,27 +135,28 @@ char visualServoTask_cycle(processT *p_ptr)
 				sbsControl(trajGenIDG, SBS_ON);
 			}*/
 
-			sbsGet(ssdIDG, LOCAL_STATE, 0, (void *)&ssdStateG);
-
-			sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
-			sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
-
-			sbsControl(ssdIDG, SBS_ON);
-
-
 //			sbsGet(ssdIDG, LOCAL_STATE, 0, (void *)&ssdStateG);
 //
-//			if(ssdStateG == 0){
+////			sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
+////			sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
+//
+//			sbsControl(ssdIDG, SBS_ON);
+
+
+			sbsGet(ssdIDG, LOCAL_STATE, 0, (void *)&ssdStateG);
+
+			if(ssdStateG == 0){
 //				sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferG);
 //				sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferG);
-//
-//				sbsControl(ssdIDG, SBS_ON);
-//
-//				ssdStateG = 1;
-//			}else if(ssdStateG == 2){
-//				ssdStateG = 0;
-//				local->state = 2;
-//			}
+
+				sbsControl(ssdIDG, SBS_ON);
+
+
+				ssdStateG = 1;
+			}else if(ssdStateG == 2){
+				ssdStateG = 0;
+				local->state = 2;
+			}
 #if DEBUG
 			sbsControl(trajGenIDG, SBS_ON);
 			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
@@ -161,42 +168,43 @@ char visualServoTask_cycle(processT *p_ptr)
 		break;
 
 		case 2: /* Trajectory Generation */
-			sbsGet(trajGenIDG, LOCAL_STATE, 0, (void *)&trajGenStateG);
-
-			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
-
-			sbsControl(trajGenIDG, SBS_ON);
-
-			local->state = 3;
-
 //			sbsGet(trajGenIDG, LOCAL_STATE, 0, (void *)&trajGenStateG);
 //
-//			if(trajGenStateG == 0){
+//			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
+//
+//			sbsControl(trajGenIDG, SBS_ON);
+//
+//			local->state = 3;
+
+			sbsGet(trajGenIDG, LOCAL_STATE, 0, (void *)&trajGenStateG);
+
+			if(trajGenStateG == 0){
 //				sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferG);
-//
-//				sbsControl(trajGenIDG, SBS_ON);
-//
-//				trajGenStateG = 1;
-//			}else if(trajGenStateG == 2){
-//				trajGenStateG = 0;
-//				local->state = 2;
-//			}
+
+				sbsControl(trajGenIDG, SBS_ON);
+
+				trajGenStateG = 1;
+			}else if(trajGenStateG == 2){
+				trajGenStateG = 0;
+				local->state = 2;
+			}
+			local->state = 3;
 
 		case 3: /* Move to Target */
-			sbsGet(actuatorIDG, LOCAL_STATE, 0, (void *)&actuatorStateG);
-
-			sbsControl(actuatorIDG, SBS_ON);
-
 //			sbsGet(actuatorIDG, LOCAL_STATE, 0, (void *)&actuatorStateG);
 //
-//			if(actuatorStateG == 0){
-//				sbsControl(actuatorIDG, SBS_ON);
-//
-//				actuatorStateG = 1;
-//			}else if(actuatorStateG == 2){
-//				actuatorStateG = 0;
-//				local->state = 4;
-//			}
+//			sbsControl(actuatorIDG, SBS_ON);
+
+			sbsGet(actuatorIDG, LOCAL_STATE, 0, (void *)&actuatorStateG);
+
+			if(actuatorStateG == 0){
+				sbsControl(actuatorIDG, SBS_ON);
+
+				actuatorStateG = 1;
+			}else if(actuatorStateG == 2){
+				actuatorStateG = 0;
+				local->state = 4;
+			}
 
 			local->state = 4;
 		break;
@@ -211,6 +219,13 @@ char visualServoTask_cycle(processT *p_ptr)
 
 		case 5: /* Turn on management unit */
 			sbsControl(manageUnitIDG, SBS_ON);
+//			xil_printf("(task.c)camReaderIDG = %X\r\n", camReaderIDG);
+//			xil_printf("(task.c)ssdIDG = %X\r\n", ssdIDG);
+//			xil_printf("(task.c)trajGenIDG = %X\r\n", trajGenIDG);
+//			xil_printf("(task.c)actuatorIDG = %X\r\n", actuatorIDG);
+//			xil_printf("(task.c)menuIDG = %X\r\n", menuIDG);
+//			xil_printf("(task.c)visualServoTaskIDG = %X\r\n", visualServoTaskIDG);
+//			xil_printf("(task.c)manageUnitIDG = %X\r\n", manageUnitIDG);
 			local->state = 0;
 		break;
 	}

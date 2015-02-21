@@ -22,6 +22,7 @@
 extern processT	*menuIDG;
 extern processT	*camReaderIDG;
 extern processT *ssdIDG;
+extern processT *ssdnewIDG;
 extern processT *trajGenIDG;
 extern processT *visualServoTaskIDG;
 extern processT *actuatorIDG;

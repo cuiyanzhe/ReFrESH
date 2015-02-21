@@ -25,6 +25,8 @@
 #include "manageUnit.h"
 #include "cc2520.h"
 
+#include "SSD_new.h"
+
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
 /* ********************************************************************************************************************************************* */
@@ -43,6 +45,8 @@ processT *menuIDG;
 processT *visualServoTaskIDG;
 processT *actuatorIDG;
 processT *manageUnitIDG;
+
+processT *ssdnewIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -98,15 +102,43 @@ int main()
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);
 	manageUnitIDG = sbsSpawn(manageUnit_init, 5, 0, 0);
 
-
-//	sbsControl(camReaderIDG, SBS_ON);
-//	sbsControl(ssdIDG, SBS_ON);
-//	sbsControl(trajGenIDG, SBS_ON);
-//	sbsControl(actuatorIDG, SBS_ON);
+	ssdnewIDG = sbsSpawn(SSDnew_init, 5, 0, 0);
 
 	sbsControl(menuIDG, SBS_ON);
 
+#if TEST
+	xil_printf("(refresh_main.c)camReaderIDG = %X\r\n", camReaderIDG);
+	xil_printf("(refresh_main.c)ssdIDG = %X\r\n", ssdIDG);
+	xil_printf("(refresh_main.c)trajGenIDG = %X\r\n", trajGenIDG);
+	xil_printf("(refresh_main.c)actuatorIDG = %X\r\n", actuatorIDG);
 
+	sbsControl(camReaderIDG, SBS_ON);
+	sbsControl(ssdIDG, SBS_ON);
+	sbsControl(trajGenIDG, SBS_ON);
+	sbsControl(actuatorIDG, SBS_ON);
+
+	procListT *onModules = sbsOnModuleList();
+	while(onModules != NULL){
+		xil_printf("test onQueueG: %X\r\n", onModules->process);
+		onModules = (procListT *)onModules->nextProc;
+	}
+
+	sbsControl(trajGenIDG, SBS_OFF);
+	sbsControl(actuatorIDG, SBS_OFF);
+
+	onModules = sbsOnModuleList();
+	while(onModules != NULL){
+		xil_printf("test onQueueG: %X\r\n", onModules->process);
+		onModules = (procListT *)onModules->nextProc;
+	}
+
+	procListT *spawnedModules = sbsSpawnedModuleList();
+
+	while(spawnedModules != NULL){
+		xil_printf("test onQueueG: %X\r\n", spawnedModules->process);
+		spawnedModules = (procListT *)spawnedModules->nextProc;
+	}
+#endif
 	/* ******************************************************************** */
 	/*        CC2520    								    				*/
 	/* ******************************************************************** */

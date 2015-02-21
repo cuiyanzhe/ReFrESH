@@ -8,6 +8,8 @@
 #ifndef MANAGEUNIT_H_
 #define MANAGEUNIT_H_
 
+#include "pbort.h"
+
 char manageUnit_on(processT *p_ptr);
 char manageUnit_cycle(processT *p_ptr);
 char manageUnit_init(processT *p_ptr, void*vptr);
@@ -20,6 +22,7 @@ typedef struct{
 	uint16_t panID;
 	uint16_t destAddr;
 	uint16_t srcAddr;
+//	procListT *taskCompList;
 } manageUnit_localT;
 
 #endif /* MANAGEUNIT_H_ */

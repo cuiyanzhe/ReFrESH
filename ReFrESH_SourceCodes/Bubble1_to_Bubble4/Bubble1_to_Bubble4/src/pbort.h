@@ -125,6 +125,10 @@ extern int sbsListMods();
  */
 int sbsEvaluator(processT *p_ptr, int type, int arg, void *vptr);
 
+extern procListT *sbsOnModuleList(); /* YC add it to get running process */
+
+extern procListT *sbsSpawnedModuleList();  /* YC add it to get spawned process */
+
 extern procListT *spawnQueueG;
 
 extern void sched();

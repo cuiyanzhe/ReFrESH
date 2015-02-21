@@ -23,6 +23,8 @@
 #include "refresh_main.h"
 #include "manageUnit.h"
 
+#include "SSD_new.h"
+
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -70,6 +72,11 @@ uint8_t i;
 uint8_t imgBufferNewG[IMG_HEIGHT * IMG_WIDTH];
 uint8_t tempPosBufferNewG[2];	/* X & Y location in image frame, 2 bytes */
 
+procListT *tempHeaderG;
+//procListT *temp;
+//procListT *onModules;
+//procListT *onQueue;
+
 /* ******************************************************************** */
 /*       manageUnit_on             start up the module.                 */
 /* ******************************************************************** */
@@ -87,6 +94,15 @@ char manageUnit_on(processT *p_ptr)
 char manageUnit_cycle(processT *p_ptr)
 {
 	manageUnit_localT  *local = (manageUnit_localT *)p_ptr->local;
+
+	procListT *temp;
+	procListT *tempTemp;
+	procListT *onQueue;
+	procListT *onQueueTest;
+	procListT *tempTempHeader;
+
+	onQueueTest = sbsOnModuleList();
+//	onQueue = onQueueTest;
 
 	switch(local->state){
     	case 0: /* Performance monitor */
@@ -164,12 +180,12 @@ char manageUnit_cycle(processT *p_ptr)
 
 			if(nonFuncG == 1 && funcG == 1){
 				local->state = 0; /* keep monitoring */
-			}else{ /* turn off task and every related PBO */
-				sbsControl(camReaderIDG, SBS_OFF);
-				sbsControl(ssdIDG, SBS_OFF);
-				sbsControl(trajGenIDG, SBS_OFF);
-				sbsControl(actuatorIDG, SBS_OFF);
-				sbsControl(visualServoTaskIDG, SBS_OFF);
+			}else{ /* turn off task and every related PBO, for testing */
+//				sbsControl(camReaderIDG, SBS_OFF);
+//				sbsControl(ssdIDG, SBS_OFF);
+//				sbsControl(trajGenIDG, SBS_OFF);
+//				sbsControl(actuatorIDG, SBS_OFF);
+//				sbsControl(visualServoTaskIDG, SBS_OFF);
 				local->state = 1;
 			}
 		break;
@@ -229,13 +245,65 @@ char manageUnit_cycle(processT *p_ptr)
     			xil_printf("This is TODO\r\n");
     		}
 
-//    		xil_printf("I'm here\r\n");
-
-    		local->state = 4; /* go to state 4 to re-connect component and run */
+			local->state = 4; /* go to state 4 to re-connect component and run */
 		break;
 
     	case 4:	/* Re-connect component and run */
     		xil_printf("You're in the re-connect and run state \r\n");
+
+    		/* Obtain a new on queue list except menu, task and manageUnit*/
+    		/* initialize a procList to build a new process list */
+    		tempHeaderG = (procListT *)malloc(sizeof(procListT));
+    		tempHeaderG->process = NULL;
+    		tempHeaderG->nextProc = NULL;
+    		temp = tempHeaderG;
+    		tempTempHeader = tempHeaderG;
+
+    		onQueue = onQueueTest;
+
+    		while(onQueue != NULL){
+				if((onQueue->process->pid == manageUnitIDG->pid) || (onQueue->process->pid == visualServoTaskIDG->pid) || (onQueue->process->pid == menuIDG->pid)){
+					onQueue = (procListT *)onQueue->nextProc;
+				}else{
+//					onModules = (procListT *)malloc(sizeof(procListT));
+//					onModules->process = onQueue->process;
+//					temp->nextProc = onModules;
+//					temp->process = onModules->process;
+//					onQueue = (procListT *)onQueue->nextProc;
+					temp->nextProc = (procListT *) malloc(sizeof(procListT));
+					temp = temp->nextProc;
+					temp->process = onQueue->process;
+					onQueue = (procListT *)onQueue->nextProc;
+
+				}
+			}
+			temp->nextProc = NULL;
+
+			tempTempHeader = (procListT *)tempTempHeader->nextProc; /* jump from the header null node */
+
+			temp = tempTempHeader;
+			tempTemp = temp;
+
+			while(tempTempHeader != NULL){
+				xil_printf("test onQueueG: %X\r\n", tempTempHeader->process);
+				tempTempHeader = (procListT *)tempTempHeader->nextProc;
+			}
+
+			free(tempHeaderG);
+
+			while(tempTemp != NULL){
+				tempTemp->nextProc = temp->nextProc;
+				tempTemp = temp->nextProc;
+				free(temp);
+				temp = tempTemp;
+			}
+
+    		/* Management Unit re-connect components */
+			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
+			sbsSet(ssdnewIDG, DATA_IN, 0, (void *)imgBufferNewG);
+			sbsSet(ssdnewIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
+			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferNewG);
+
 
     		/*---TODO:
     		 * NEED TO FIGURE OUT WHERE TO PUT sbsSet to connect all components
@@ -244,18 +312,18 @@ char manageUnit_cycle(processT *p_ptr)
     		 */
 
     		/* This is just a try, NEED TO THINK HOW TO BUILD A FSM */
-    		sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
-    		sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferNewG);
-    		sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
+//    		sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
+//    		sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferNewG);
+//    		sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
 
-    		sbsControl(camReaderIDG, SBS_ON);
-    		sbsControl(ssdIDG, SBS_ON);
-    		sbsControl(trajGenIDG, SBS_ON);
-    		sbsControl(actuatorIDG, SBS_ON);
+//    		sbsControl(camReaderIDG, SBS_ON);
+//    		sbsControl(ssdIDG, SBS_ON);
+//    		sbsControl(trajGenIDG, SBS_ON);
+//    		sbsControl(actuatorIDG, SBS_ON);
 
 //    		sbsControl(visualServoTaskIDG, SBS_ON);
 
-			local->state = 0; /* go to state 0 to monitor the new cfg */
+//			local->state = 0; /* go to state 0 to monitor the new cfg */
 		break;
 
 		case 5:	/* TODO: Identify source of degradation */
@@ -299,6 +367,12 @@ char manageUnit_init(processT *p_ptr, void*vptr)
 	local->panID = 0xAAAA;
 	local->srcAddr = 0x11AA;
 	local->destAddr = 0x11BB;
+
+	/* Management Unit connect components firstly */
+	sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
+	sbsSet(ssdIDG, DATA_IN, 0, (void *)imgBufferNewG);
+	sbsSet(ssdIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
+	sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferNewG);
 
 	return I_OK;
 }

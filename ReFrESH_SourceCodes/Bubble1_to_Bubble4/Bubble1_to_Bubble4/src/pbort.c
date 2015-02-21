@@ -58,6 +58,8 @@ short   readyHeadG, readyTailG;
 unsigned long   pidG;           /* counting process ID */
 long			LED_valueG;
 
+procListT       *onModulesTestG;      /* YC adds to test */
+
 // These are hacks to prove out the downloading function
 uint8_t		codeBufG[256];		// Temporary code buffer -- can be larger than 256 bytes, but only 256 bytes to FLASH at a time
 uint8_t		codeIndexG;			// Index into the codeBufG array
@@ -398,6 +400,8 @@ processT *sbsSpawn(charfnc_ptr f_ptr, float freq, short crit, void *vptr)
   return queue->process;
 }
 
+
+
 int sbsControl(processT *p_ptr, short cmd)
 {
 	procListT     *queue;
@@ -486,6 +490,9 @@ int sbsControl(processT *p_ptr, short cmd)
 				queue->nextProc = (pointer) temp;
 				//XUartLite_SendByte(XPAR_RS232_UART_2_BASEADDR,0x57);
 			} /* endif */
+
+			onModulesTestG = queue;
+
 			break;
 
   case SBS_OFF:
@@ -1046,7 +1053,7 @@ void parseOSCmd(uint8_t *str)
 					sbsControl(queue->process, SBS_EST);
 					sbsGet(queue->process, FR_EST, 0, (void *)&FesPerf);
 					sbsGet(queue->process, NFR_EST, 0, (void *)&NFesPerf);
-					sbsGet(queue->process, EST_OUTPUT, 0, (void *)&estOut);
+					//sbsGet(queue->process, EST_OUTPUT, 0, (void *)&estOut);
 					break;
 				}
 				queue = (procListT *)queue->nextProc;
@@ -1321,6 +1328,18 @@ void parseDLline(uint8_t *str)
 #endif
 
 #if !DEBUG
+
+procListT *sbsOnModuleList()
+{
+	return onQueueG;
+}
+
+procListT *sbsSpawnedModuleList()
+{
+	return spawnQueueG;
+}
+
+
 /* TODO:
  * --- This function extends traditional PBO by adding an EVALUATOR.
  * --- NEED TO FIGURE OUT: API sbsEvaluator(processT *p_ptr, void * funcPerfBuffer; void *nonFuncPerfBuffer)?????
