@@ -33,7 +33,7 @@ typedef struct{
 	 * and 2) non-functional evaluated value. These values are compared with the
 	 * status of the node. */
 	uint8_t				funcPerfValue;		/* functional performance value of each component */
-	uint8_t				power;
+	int					power;
 	int					commuRSSI;
 
 	/* TODO:

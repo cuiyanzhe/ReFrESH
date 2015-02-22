@@ -84,7 +84,7 @@ char visualServoTask_cycle(processT *p_ptr)
 			sbsGet(camReaderIDG, LOCAL_STATE, 0, (void *)&camReaderStateG);
 
 			if(camReaderStateG == 0){
-				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
+//				sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferG);
 				sbsControl(camReaderIDG, SBS_ON);
 
 				camReaderStateG = 1;

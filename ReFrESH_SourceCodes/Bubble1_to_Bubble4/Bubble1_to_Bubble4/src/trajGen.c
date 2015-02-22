@@ -71,15 +71,15 @@ char trajGen_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
-//		case EST_INPUT:
-//			pTrajGenLocal->estInPtr = (uint8_t *)vptr;
-//			return I_OK;
-//		break;
-//
-//		case EST_OUTPUT:
-//			pTrajGenLocal->estOutPtr = (uint8_t *)vptr;
-//			return I_OK;
-//		break;
+		case EST_DATA_IN:
+			pTrajGenLocal->estInPtr = (uint8_t *)vptr;
+			return I_OK;
+		break;
+
+		case EST_DATA_OUT:
+			pTrajGenLocal->estOutPtr = (uint8_t *)vptr;
+			return I_OK;
+		break;
 
 		/* ---TODO:
 		 * This part is for EVLAUATOR, uncomment this part after test each single component
@@ -188,6 +188,41 @@ char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 }
 
 
+void trajGen_function(trajGen_localT *l_ptr, uint8_t *inType, uint8_t *outType)
+{
+	uint8_t imgCenter = IMG_WIDTH / 2;
+
+		/* ---TODO:
+		 * Implement a real trajectory generator
+		 */
+	#if TRAJGEN_DEBUG
+		uint8_t xLoc = 3;
+		xil_printf("The X Loc is: %d.\r\n", xLoc);
+
+		if(xLoc < imgCenter){
+			xil_printf("Turn left!\r\n");
+		}else if(xLoc > imgCenter){
+			xil_printf("Turn right!\r\n");
+		}else{
+			xil_printf("Stay there!\r\n");
+		}
+	#endif
+
+	#if TASK_DEBUG
+		uint8_t xLoc = inType[0];
+		xil_printf("(trajGen.c)The X Loc got from SSD module is: %d.\r\n", xLoc);
+
+		if(xLoc < imgCenter){
+			xil_printf("(trajGen.c)Turn left!\r\n");
+		}else if(xLoc > imgCenter){
+			xil_printf("(trajGen.c)Turn right!\r\n");
+		}else{
+			xil_printf("(trajGen.c)Stay there!\r\n");
+		}
+	#endif
+
+}
+
 /* ******************************************************************** */
 /*       SSD_cycle              Trajectory generation.                  */
 /* ******************************************************************** */
@@ -196,36 +231,38 @@ char trajGen_cycle(processT *p_ptr)
 {
 	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
 	
-	uint8_t imgCenter = IMG_WIDTH / 2;
+//	uint8_t imgCenter = IMG_WIDTH / 2;
+//
+//	/* ---TODO:
+//	 * Implement a real trajectory generator
+//	 */
+//#if TRAJGEN_DEBUG
+//	uint8_t xLoc = 3;
+//	xil_printf("The X Loc is: %d.\r\n", xLoc);
+//
+//	if(xLoc < imgCenter){
+//		xil_printf("Turn left!\r\n");
+//	}else if(xLoc > imgCenter){
+//		xil_printf("Turn right!\r\n");
+//	}else{
+//		xil_printf("Stay there!\r\n");
+//	}
+//#endif
+//
+//#if TASK_DEBUG
+//	uint8_t xLoc = pTrajGenLocal->inPtr[0];
+//	xil_printf("(trajGen.c)The X Loc got from SSD module is: %d.\r\n", xLoc);
+//
+//	if(xLoc < imgCenter){
+//		xil_printf("(trajGen.c)Turn left!\r\n");
+//	}else if(xLoc > imgCenter){
+//		xil_printf("(trajGen.c)Turn right!\r\n");
+//	}else{
+//		xil_printf("(trajGen.c)Stay there!\r\n");
+//	}
+//#endif
 
-	/* ---TODO:
-	 * Implement a real trajectory generator
-	 */
-#if TRAJGEN_DEBUG
-	uint8_t xLoc = 3;
-	xil_printf("The X Loc is: %d.\r\n", xLoc);
-
-	if(xLoc < imgCenter){
-		xil_printf("Turn left!\r\n");
-	}else if(xLoc > imgCenter){
-		xil_printf("Turn right!\r\n");
-	}else{
-		xil_printf("Stay there!\r\n");
-	}
-#endif
-
-#if TASK_DEBUG
-	uint8_t xLoc = pTrajGenLocal->inPtr[0];
-	xil_printf("(trajGen.c)The X Loc got from SSD module is: %d.\r\n", xLoc);
-
-	if(xLoc < imgCenter){
-		xil_printf("(trajGen.c)Turn left!\r\n");
-	}else if(xLoc > imgCenter){
-		xil_printf("(trajGen.c)Turn right!\r\n");
-	}else{
-		xil_printf("(trajGen.c)Stay there!\r\n");
-	}
-#endif
+	trajGen_function(pTrajGenLocal, pTrajGenLocal->inPtr, 0);
 
 	pTrajGenLocal->trajState = 2;
 
@@ -262,6 +299,20 @@ char trajGen_eval(processT *p_ptr, int type, int arg, void *vptr)
 
 
 /* ******************************************************************** */
+/*       trajGen_est                 obtain required parameters.        */
+/* ******************************************************************** */
+
+char trajGen_est(processT *p_ptr)
+{
+	trajGen_localT  *pTrajGenLocal = (trajGen_localT *)p_ptr->local;
+
+	trajGen_function(pTrajGenLocal, pTrajGenLocal->estInPtr, 0);
+
+	return I_OK;
+}
+
+
+/* ******************************************************************** */
 /*        trajGen_init             Initiate module information.         */
 /* ******************************************************************** */
 
@@ -273,6 +324,7 @@ char trajGen_init(processT *p_ptr, void*vptr)
 	p_ptr->set_fptr = trajGen_set;
 	p_ptr->get_fptr = trajGen_get;
 	p_ptr->eval_fptr = trajGen_eval;
+	p_ptr->est_fptr = trajGen_est;
 	
 	/* Allocate the local structure for the module - optional
 	 * This struct will be freed automatically when SBS_KILL is implemented */

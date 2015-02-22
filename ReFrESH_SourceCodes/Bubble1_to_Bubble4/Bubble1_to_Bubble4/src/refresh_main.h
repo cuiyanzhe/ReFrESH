@@ -21,13 +21,16 @@
 
 extern processT	*menuIDG;
 extern processT	*camReaderIDG;
+extern processT	*camReader1IDG;
 extern processT *ssdIDG;
-extern processT *ssdnewIDG;
+
 extern processT *trajGenIDG;
 extern processT *visualServoTaskIDG;
 extern processT *actuatorIDG;
 extern processT *manageUnitIDG;
 
+extern processT *ssdnewIDG;
+extern processT *dehazerIDG;
 
 
 ////////////////////////////////////////////////////////////////////////////////////

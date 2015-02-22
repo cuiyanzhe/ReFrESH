@@ -103,6 +103,16 @@ char SSD_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			return I_OK;
 		break;
 
+		case EST_DATA_IN:
+			pSSDLocal->estInPtr = (uint8_t *)vptr;
+			return I_OK;
+		break;
+
+		case EST_DATA_OUT:
+			pSSDLocal->estOutPtr = (uint8_t *)vptr;
+			return I_OK;
+		break;
+
 //		case EST_INPUT:
 //			pSSDLocal->estInPtr = (uint8_t *)vptr;
 //			return I_OK;
@@ -227,16 +237,9 @@ char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 }
 
 
-/* ******************************************************************** */
-/*       SSD_cycle              Get the position of target and error.   */
-/* ******************************************************************** */
-
-char SSD_cycle(processT *p_ptr)
+void SSD_function(ssd_localT *l_ptr, uint8_t *inType, uint8_t *outType)
 {
-	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
 
-	short 	tmpShort;
-	char	tmpChar;
 	uint8_t		i, j, k, l;
 	uint8_t		pixel_error = 0;
 	uint8_t		targetXLoc=0;
@@ -248,8 +251,8 @@ char SSD_cycle(processT *p_ptr)
 			for(k=0; k<TEMP_HEIGHT; k++){
 				for(l=0; l<TEMP_WIDTH; l++){
 #if TASK_DEBUG
-					pixel_error = pixel_error + ((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l]-(int)template3G[k * TEMP_WIDTH + l])*
-							((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l] - (int)template3G[k * TEMP_WIDTH + l]);
+					pixel_error = pixel_error + ((int)inType[(i + k) * IMG_WIDTH + j + l]-(int)template3G[k * TEMP_WIDTH + l])*
+							((int)inType[(i + k) * IMG_WIDTH + j + l] - (int)template3G[k * TEMP_WIDTH + l]);
 #endif
 
 #if SSD_DEBUG
@@ -271,16 +274,74 @@ char SSD_cycle(processT *p_ptr)
 //	xil_printf("Smallest Error: %d, X Loc: %d, Y Loc: %d\r\n", errorImg, targetXLoc, targetYLoc);
 
 #if TASK_DEBUG
-	pSSDLocal->outPtr[0] = targetXLoc;
-	pSSDLocal->outPtr[1] = targetYLoc;
-	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
+	outType[0] = targetXLoc;
+	outType[1] = targetYLoc;
+	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", outType[0], outType[1]);
 
 	/* This calculation is for EVALUATOR */
-	pSSDLocal->funcPerfValue = 100 * (TEMP_HEIGHT * TEMP_WIDTH * 255 - errorImg) / (TEMP_HEIGHT * TEMP_WIDTH * 255); /* normalized SSD error, the higher value means the better performance */
+	l_ptr->funcPerfValue = 100 * (TEMP_HEIGHT * TEMP_WIDTH * 255 - errorImg) / (TEMP_HEIGHT * TEMP_WIDTH * 255); /* normalized SSD error, the higher value means the better performance */
 //	xil_printf("The func performance of SSD is: %d\r\n", pSSDLocal->funcPerfValue);
 #endif
 
-	pSSDLocal->ssdState = 2;
+	l_ptr->ssdState = 2;
+}
+
+/* ******************************************************************** */
+/*       SSD_cycle              Get the position of target and error.   */
+/* ******************************************************************** */
+
+char SSD_cycle(processT *p_ptr)
+{
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
+
+	SSD_function(pSSDLocal, pSSDLocal->inPtr, pSSDLocal->outPtr);
+
+//	short 	tmpShort;
+//	char	tmpChar;
+//	uint8_t		i, j, k, l;
+//	uint8_t		pixel_error = 0;
+//	uint8_t		targetXLoc=0;
+//	uint8_t		targetYLoc=0;
+//	uint8_t		errorImg = 50;       //max positive value for a long type
+//
+//	for(i=0; i<=(IMG_HEIGHT-TEMP_HEIGHT); i++){
+//		for(j=0; j<=(IMG_WIDTH-TEMP_WIDTH); j++){
+//			for(k=0; k<TEMP_HEIGHT; k++){
+//				for(l=0; l<TEMP_WIDTH; l++){
+//#if TASK_DEBUG
+//					pixel_error = pixel_error + ((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l]-(int)template3G[k * TEMP_WIDTH + l])*
+//							((int)pSSDLocal->inPtr[(i + k) * IMG_WIDTH + j + l] - (int)template3G[k * TEMP_WIDTH + l]);
+//#endif
+//
+//#if SSD_DEBUG
+//					pixel_error = pixel_error + ((int)imgBufferTestSSDG[(i + k) * IMG_WIDTH + j + l]-(int)template2G[k * TEMP_WIDTH + l])*
+//							((int)imgBufferTestSSDG[(i + k) * IMG_WIDTH + j + l] - (int)template2G[k * TEMP_WIDTH + l]);
+//#endif
+//				}
+//			}
+//
+//			if(pixel_error < errorImg){
+//				errorImg = pixel_error;
+//				targetXLoc = j;
+//				targetYLoc = i;
+//			}
+//			pixel_error = 0;
+//		}
+//	}
+//
+////	xil_printf("Smallest Error: %d, X Loc: %d, Y Loc: %d\r\n", errorImg, targetXLoc, targetYLoc);
+//
+//#if TASK_DEBUG
+//	pSSDLocal->outPtr[0] = targetXLoc;
+//	pSSDLocal->outPtr[1] = targetYLoc;
+//	xil_printf("(SSD.c)SSD output ports: X Loc: %d, Y Loc: %d\r\n", pSSDLocal->outPtr[0], pSSDLocal->outPtr[1]);
+//
+//	/* This calculation is for EVALUATOR */
+//	pSSDLocal->funcPerfValue = 100 * (TEMP_HEIGHT * TEMP_WIDTH * 255 - errorImg) / (TEMP_HEIGHT * TEMP_WIDTH * 255); /* normalized SSD error, the higher value means the better performance */
+////	xil_printf("The func performance of SSD is: %d\r\n", pSSDLocal->funcPerfValue);
+//#endif
+//
+//	pSSDLocal->ssdState = 2;
 
 	return I_OK;
 
@@ -316,6 +377,20 @@ char SSD_eval(processT *p_ptr, int type, int arg, void *vptr)
 
 
 /* ******************************************************************** */
+/*       SSD_est              Obtain estimated value.               */
+/* ******************************************************************** */
+
+char SSD_est(processT *p_ptr)
+{
+	ssd_localT  *pSSDLocal = (ssd_localT *)p_ptr->local;
+
+	SSD_function(pSSDLocal, pSSDLocal->estInPtr, pSSDLocal->estOutPtr);
+
+	return I_OK;
+}
+
+
+/* ******************************************************************** */
 /*        SSD_init                 Initiate module information.         */
 /* ******************************************************************** */
 
@@ -327,6 +402,7 @@ char SSD_init(processT *p_ptr, void*vptr)
 	p_ptr->eval_fptr = SSD_eval;
 	p_ptr->set_fptr = SSD_set;
 	p_ptr->get_fptr = SSD_get;
+	p_ptr->est_fptr = SSD_est;
 
 
 	/* Allocate the local structure for the module - optional

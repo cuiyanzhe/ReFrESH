@@ -1327,23 +1327,19 @@ void parseDLline(uint8_t *str)
 }
 #endif
 
-#if !DEBUG
-
+/* 02/20/2015 YC This function provides all components that were  turned on. */
 procListT *sbsOnModuleList()
 {
 	return onQueueG;
 }
 
+/* 02/20/2015 YC This function provides all components that were spawned. */
 procListT *sbsSpawnedModuleList()
 {
 	return spawnQueueG;
 }
 
-
-/* TODO:
- * --- This function extends traditional PBO by adding an EVALUATOR.
- * --- NEED TO FIGURE OUT: API sbsEvaluator(processT *p_ptr, void * funcPerfBuffer; void *nonFuncPerfBuffer)?????
- */
+/* 02/20/2015 YC This function extends traditional PBO by adding an EVALUATOR (v1.0) */
 int sbsEvaluator(processT *p_ptr, int type, int arg, void *vptr)
 {
 	procListT     *spawned;
@@ -1376,7 +1372,49 @@ int sbsEvaluator(processT *p_ptr, int type, int arg, void *vptr)
 
 	return I_OK;
 }
-#endif
+
+
+/* 02/22/2015 YC This function extends traditional PBO by adding an ESTIMATOR (v1.0) */
+int sbsEstimator(processT *p_ptr)
+{
+	procListT     *spawned;
+
+	spawned = spawnQueueG;
+
+	/* Make sure it has been spawned */
+	if (spawned->process == NULL){
+		xil_printf("ERROR: the corresponding executor (PBO) is not spawned \r\n");
+		return I_ERROR;
+	}
+	if ((p_ptr == NULL) || (p_ptr->pid >= pidG)){
+		xil_printf("ERROR: the corresponding executor's (PBO) process ID is invalid \r\n");
+		return I_ERROR;
+	}
+
+	p_ptr->est_fptr(p_ptr);
+	/* Distinguish two situations: if component is on or is not on
+	 * If it's on, copy data to another buffer (besides buffer that used by another on component) that can be used by the component that isn't on
+	 * If it's off, just generate data to a buffer
+	 */
+	/* If it's on, use get_fptr to get data */
+//	if (p_ptr->status == SBS_ON){
+//		if(p_ptr->est_fptr != NULL){	/* make sure get_fptr is defined */
+//			p_ptr->est_fptr(p_ptr);
+//		}else{
+//			return I_ERROR;
+//		}
+//	}else if(p_ptr->status == SBS_OFF){	/* If it's off, use est_fptr to get data */
+//		if(p_ptr->est_fptr != NULL){	/* make sure est_fptr is defined */
+//			sbsControl(p_ptr, SBS_ON);
+//			p_ptr->est_fptr(p_ptr);
+//			sbsControl(p_ptr, SBS_OFF);
+//		}else{
+//			return I_ERROR;
+//		}
+//	}
+	return I_OK;
+}
+
 
 
 void sched()

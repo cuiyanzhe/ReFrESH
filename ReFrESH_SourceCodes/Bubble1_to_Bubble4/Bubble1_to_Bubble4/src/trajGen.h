@@ -16,6 +16,7 @@ char trajGen_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
 char trajGen_cycle(processT *p_ptr);
 char trajGen_init(processT *p_ptr, void*vptr);
 char trajGen_eval(processT *p_ptr, int type, int arg, void *vptr);
+char trajGen_est(processT *p_ptr);
 
 //uint8_t trajState;
 
@@ -35,7 +36,7 @@ typedef struct{
 	 * and 2) non-functional evaluated value. These values are compared with the
 	 * status of the node. */
 	uint8_t				funcPerfValue;		/* functional performance value of each component */
-	uint8_t				power;
+	int					power;
 	int					commuRSSI;
 
 	/* TODO:

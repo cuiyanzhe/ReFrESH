@@ -34,9 +34,22 @@
 /*      global variable						                                              														 */
 /* ********************************************************************************************************************************************* */
 uint8_t imgBufferTestG[IMG_HEIGHT][IMG_WIDTH] = {
-		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
-		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
-		{55, 55, 55, 255, 255, 255, 255, 255, 255, 255},
+		{56, 55, 55, 255, 255, 255, 255, 255, 255, 255},
+		{55, 56, 55, 255, 255, 255, 255, 255, 255, 255},
+		{55, 55, 56, 255, 255, 255, 255, 255, 255, 255},
+		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
+		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
+		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
+		{255, 255, 255, 255, 255, 255, 75, 75, 75, 255},
+		{255, 255, 255, 255, 255, 255, 75, 75, 75, 255},
+		{255, 255, 255, 255, 255, 255, 75, 75, 75, 255},
+		{255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
+};
+
+uint8_t imgBufferBadTestG[IMG_HEIGHT][IMG_WIDTH] = {
+		{55, 65, 65, 255, 255, 255, 255, 255, 255, 255},
+		{55, 60, 60, 255, 255, 255, 255, 255, 255, 255},
+		{60, 65, 65, 255, 255, 255, 255, 255, 255, 255},
 		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
 		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
 		{255, 255, 255, 65, 65, 65, 255, 255, 255, 255},
@@ -81,6 +94,10 @@ char camReader_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 			pCamReaderLocal->outPtr = (uint8_t *)vptr;
 			return I_OK;
 		break;
+
+		case EST_DATA_OUT:
+			pCamReaderLocal->estOutPtr = (uint8_t *)vptr;
+			return I_OK;
 
 //		case EST_INPUT:
 //			pCamReaderLocal->estInPtr = (uint8_t *)vptr;
@@ -197,6 +214,51 @@ char camReader_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr)
 	return I_OK;
 }
 
+void camReader_function(camReader_localT *l_ptr, uint8_t *inType, uint8_t *outType)
+{
+	/* --- TODO:
+		 * make a camReader subfunction that return the value to a 2D array, named imgBuffer;
+		 * for(i = 0; i < IMG_SIZE; i++){
+		 *    imgBuffer[i++] = camReader;
+		 * }
+		 */
+		uint16_t pixelCnt = 0;
+		uint8_t *pImg = imgBufferTestG[0];
+
+	//	xil_printf("TP1\r\n");
+
+	#if CAMERA_DEBUG
+		uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
+		while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+			testImgBuf[pixelCnt] = pImg[pixelCnt];
+			pixelCnt++;
+		}
+
+		uint8_t i = 0;
+		for(i = 0; i < 100; i++){
+			xil_printf("%d, ", testImgBuf[i]);
+			if(i % 10 == 9){
+				xil_printf("\r\n");
+			}
+		}
+	#endif
+
+	#if TASK_DEBUG
+		while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+			outType[pixelCnt] = pImg[pixelCnt];
+			pixelCnt++;
+		}
+		/* test if the output of outPtr buffer is correct */
+		uint8_t i = 0;
+		xil_printf("(camReader.c)Print out pixels info.\r\n");
+		for(i = 0; i < 100; i++){
+			xil_printf("%d, ", outType[i]);
+			if(i % 10 == 9){
+				xil_printf("\r\n");
+			}
+		}
+	#endif
+}
 
 /* ******************************************************************** */
 /*       camReader_cycle              Get the frame.                    */
@@ -206,48 +268,50 @@ char camReader_cycle(processT *p_ptr)
 {
 	camReader_localT  *pCamReaderLocal = (camReader_localT *)p_ptr->local;
 
-	/* --- TODO:
-	 * make a camReader subfunction that return the value to a 2D array, named imgBuffer;
-	 * for(i = 0; i < IMG_SIZE; i++){
-	 *    imgBuffer[i++] = camReader;
-	 * }
-	 */
-	uint16_t pixelCnt = 0;
-	uint8_t *pImg = imgBufferTestG[0];
+//	/* --- TODO:
+//	 * make a camReader subfunction that return the value to a 2D array, named imgBuffer;
+//	 * for(i = 0; i < IMG_SIZE; i++){
+//	 *    imgBuffer[i++] = camReader;
+//	 * }
+//	 */
+//	uint16_t pixelCnt = 0;
+//	uint8_t *pImg = imgBufferTestG[0];
+//
+////	xil_printf("TP1\r\n");
+//
+//#if CAMERA_DEBUG
+//	uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
+//	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+//		testImgBuf[pixelCnt] = pImg[pixelCnt];
+//		pixelCnt++;
+//	}
+//
+//	uint8_t i = 0;
+//	for(i = 0; i < 100; i++){
+//		xil_printf("%d, ", testImgBuf[i]);
+//		if(i % 10 == 9){
+//			xil_printf("\r\n");
+//		}
+//	}
+//#endif
+//
+//#if TASK_DEBUG
+//	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
+//		pCamReaderLocal->outPtr[pixelCnt] = pImg[pixelCnt];
+//		pixelCnt++;
+//	}
+//	/* test if the output of outPtr buffer is correct */
+//	uint8_t i = 0;
+//	xil_printf("(camReader.c)Print out pixels info.\r\n");
+//	for(i = 0; i < 100; i++){
+//		xil_printf("%d, ", pCamReaderLocal->outPtr[i]);
+//		if(i % 10 == 9){
+//			xil_printf("\r\n");
+//		}
+//	}
+//#endif
 
-//	xil_printf("TP1\r\n");
-
-#if CAMERA_DEBUG
-	uint8_t testImgBuf[IMG_HEIGHT * IMG_WIDTH];
-	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
-		testImgBuf[pixelCnt] = pImg[pixelCnt];
-		pixelCnt++;
-	}
-
-	uint8_t i = 0;
-	for(i = 0; i < 100; i++){
-		xil_printf("%d, ", testImgBuf[i]);
-		if(i % 10 == 9){
-			xil_printf("\r\n");
-		}
-	}
-#endif
-
-#if TASK_DEBUG
-	while(pixelCnt < IMG_HEIGHT * IMG_WIDTH){
-		pCamReaderLocal->outPtr[pixelCnt] = pImg[pixelCnt];
-		pixelCnt++;
-	}
-	/* test if the output of outPtr buffer is correct */
-	uint8_t i = 0;
-	xil_printf("(camReader.c)Print out pixels info.\r\n");
-	for(i = 0; i < 100; i++){
-		xil_printf("%d, ", pCamReaderLocal->outPtr[i]);
-		if(i % 10 == 9){
-			xil_printf("\r\n");
-		}
-	}
-#endif
+	camReader_function(pCamReaderLocal, 0, pCamReaderLocal->outPtr);
 
 	pCamReaderLocal->cameraState = 2;
 
@@ -280,6 +344,20 @@ char camReader_eval(processT *p_ptr, int type, int arg, void *vptr)
 
 
 /* ******************************************************************** */
+/*       SSD_est              Obtain estimated value.               */
+/* ******************************************************************** */
+
+char camReader_est(processT *p_ptr)
+{
+	camReader_localT  *pCamReaderLocal = (camReader_localT *)p_ptr->local;
+
+	camReader_function(pCamReaderLocal, 0, pCamReaderLocal->estOutPtr);
+
+	return I_OK;
+}
+
+
+/* ******************************************************************** */
 /*        camReader_init           Initiate module information.         */
 /* ******************************************************************** */
 
@@ -291,6 +369,7 @@ char camReader_init(processT *p_ptr, void *vptr)
 	p_ptr->set_fptr = camReader_set;
 	p_ptr->get_fptr = camReader_get;
 	p_ptr->eval_fptr = camReader_eval;
+	p_ptr->est_fptr = camReader_est;
 
 //	xil_printf("init get fptr = %X\r\n",camReader_get);
 

@@ -25,7 +25,8 @@
 #include "manageUnit.h"
 #include "cc2520.h"
 
-#include "SSD_new.h"
+#include "dehazer.h"
+//#include "SSD_new.h"
 
 /* ********************************************************************************************************************************************* */
 /*      definition							                                              														 */
@@ -39,6 +40,7 @@
 /*      Global variables                                             														 					 */
 /* ********************************************************************************************************************************************* */
 processT *camReaderIDG;
+processT *camReader1IDG;
 processT *ssdIDG;
 processT *trajGenIDG;
 processT *menuIDG;
@@ -47,6 +49,7 @@ processT *actuatorIDG;
 processT *manageUnitIDG;
 
 processT *ssdnewIDG;
+processT *dehazerIDG;
 
 #define IMG_HEIGHT 10
 #define IMG_WIDTH  10
@@ -96,13 +99,15 @@ int main()
 	/* Spawn components */
 	visualServoTaskIDG = sbsSpawn(visualServoTask_init, 50, 0, 0); /* Spawn task firstly and the frequency should be set as the summation of all other PBOs */
 	camReaderIDG = sbsSpawn(camReader_init, 5, 0, 0);
+	dehazerIDG = sbsSpawn(dehazer_init, 5, 0, 0);
 	ssdIDG = sbsSpawn(SSD_init, 5, 0, 0);
 	trajGenIDG = sbsSpawn(trajGen_init, 5, 0, 0);
 	actuatorIDG = sbsSpawn(actuator_init, 5, 0, 0);
 	menuIDG = sbsSpawn(menu_init, 5, 0, 0);
 	manageUnitIDG = sbsSpawn(manageUnit_init, 5, 0, 0);
 
-	ssdnewIDG = sbsSpawn(SSDnew_init, 5, 0, 0);
+
+//	ssdnewIDG = sbsSpawn(SSDnew_init, 5, 0, 0);
 
 	sbsControl(menuIDG, SBS_ON);
 

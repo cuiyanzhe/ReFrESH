@@ -22,8 +22,8 @@
 #include "actuator.h"
 #include "refresh_main.h"
 #include "manageUnit.h"
-
-#include "SSD_new.h"
+#include "dehazer.h"
+//#include "SSD_new.h"
 
 
 /* ********************************************************************************************************************************************* */
@@ -70,7 +70,10 @@ uint8_t	actuatorNodeG;
 uint8_t i;
 
 uint8_t imgBufferNewG[IMG_HEIGHT * IMG_WIDTH];
+uint8_t imgBufferESTG[IMG_HEIGHT * IMG_WIDTH];
+uint8_t imgBufferDehazerESTG[IMG_HEIGHT * IMG_WIDTH];
 uint8_t tempPosBufferNewG[2];	/* X & Y location in image frame, 2 bytes */
+uint8_t tempPosBufferESTG[2];	/* X & Y location in image frame, 2 bytes */
 
 procListT *tempHeaderG;
 //procListT *temp;
@@ -299,10 +302,10 @@ char manageUnit_cycle(processT *p_ptr)
 			}
 
     		/* Management Unit re-connect components */
-			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
-			sbsSet(ssdnewIDG, DATA_IN, 0, (void *)imgBufferNewG);
-			sbsSet(ssdnewIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
-			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferNewG);
+//			sbsSet(camReaderIDG, DATA_OUT, 0, (void *)imgBufferNewG);
+//			sbsSet(ssdnewIDG, DATA_IN, 0, (void *)imgBufferNewG);
+//			sbsSet(ssdnewIDG, DATA_OUT, 0, (void *)tempPosBufferNewG);
+//			sbsSet(trajGenIDG, DATA_IN, 0, (void *)tempPosBufferNewG);
 
 
     		/*---TODO:
@@ -323,7 +326,23 @@ char manageUnit_cycle(processT *p_ptr)
 
 //    		sbsControl(visualServoTaskIDG, SBS_ON);
 
-//			local->state = 0; /* go to state 0 to monitor the new cfg */
+			xil_printf("-----------------BEGIN:Test Estimator-----------------\r\n");
+
+			sbsSet(camReaderIDG, EST_DATA_OUT, 0, (void *)imgBufferESTG);
+			sbsSet(dehazerIDG, EST_DATA_IN, 0, (void *)imgBufferESTG);
+			sbsSet(dehazerIDG, EST_DATA_OUT, 0, (void *)imgBufferDehazerESTG);
+			sbsSet(ssdIDG, EST_DATA_IN, 0, (void *)imgBufferDehazerESTG);
+			sbsSet(ssdIDG, EST_DATA_OUT, 0, (void *)tempPosBufferESTG);
+			sbsSet(trajGenIDG, EST_DATA_IN, 0, (void *)tempPosBufferESTG);
+
+			sbsEstimator(camReaderIDG);
+			sbsEstimator(dehazerIDG);
+			sbsEstimator(ssdIDG);
+			sbsEstimator(trajGenIDG);
+
+			xil_printf("------------------END:Test Estimator------------------\r\n");
+
+			local->state = 5; /* SHOULD BE 0, 5 IS JUST FOR DEBUG. go to state 0 to monitor the new cfg */
 		break;
 
 		case 5:	/* TODO: Identify source of degradation */

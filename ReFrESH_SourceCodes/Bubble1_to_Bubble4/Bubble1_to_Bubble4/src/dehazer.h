@@ -1,5 +1,5 @@
-/* --- SSD.h       Version 1.0
-   --- This file provides the related function prototype of SSD.
+/* --- dehazer.h       Version 1.0
+   --- This file provides the related function prototype of dehazer.
    ---
    --- Copyright 2015, Collaborative Robotics Lab.
    ---
@@ -7,18 +7,18 @@
    ---
    --- */
 
-#ifndef SSD_H_
-#define SSD_H_
+#ifndef DEHAZER_H_
+#define DEHAZER_H_
 
-char SSD_on(processT *p_ptr);
-char SSD_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
-char SSD_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
-char SSD_cycle(processT *p_ptr);
-char SSD_init(processT *p_ptr, void*vptr);
-char SSD_eval(processT *p_ptr, int type, int arg, void *vptr);
-char SSD_est(processT *p_ptr);
+char dehazer_on(processT *p_ptr);
+char dehazer_set(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
+char dehazer_get(processT *p_ptr, int16_t type, int16_t arg, void *vptr);
+char dehazer_cycle(processT *p_ptr);
+char dehazer_init(processT *p_ptr, void *vptr);
+char dehazer_eval(processT *p_ptr, int type, int arg, void *vptr);
+char dehazer_est(processT *p_ptr);
 
-//uint8_t ssdState;
+//uint8_t cameraState;   ////////////////////////////////////fault
 
 typedef struct{
 /* this part is for Executor (EX) */
@@ -45,9 +45,8 @@ typedef struct{
 	uint8_t				*estInPtr;
 	uint8_t				*estOutPtr;
 
-	uint8_t				ssdState;
+	uint8_t				dehazerState;
 	uint8_t				type;
-}ssd_localT;
+}dehazer_localT;
 
-
-#endif /* SSD_H_ */
+#endif /* DEHAZER_H_ */
