@@ -1,20 +1,20 @@
 Project Name
 
-ReFrESH
+	ReFrESH
 
 Platform
 
-Xilinx Virtex 4/5 FPGA
-RecoNode
-ML405
-ML507
+	Xilinx Virtex 4/5 FPGA
+	RecoNode
+	ML405
+	ML507
 
 Usage
 
-Copy all the .c&.h files in Xilinx ISE14.4 SDK project.
+	Copy all the .c&.h files in Xilinx ISE14.4 SDK project.
 
 License
 
-Collaborative Robotics Lab at Purdue University
+	Collaborative Robotics Lab at Purdue University
 
 
