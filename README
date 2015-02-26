@@ -1,1 +1,18 @@
-This is readme file for ReFrESH
+Project Name
+
+    ReFrESH
+
+Platform
+
+    Xilinx Virtex 4/5 FPGA
+    RecoNode
+    ML405
+    ML507
+
+Usage
+
+    Copy all the .c&.h files in Xilinx ISE14.4 SDK project.
+
+License
+
+    Collaborative Robotics Lab at Purdue University
